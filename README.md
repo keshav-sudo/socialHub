@@ -1,7 +1,6 @@
 # 📖 Social Media Microservices Documentation
 
-This document explains the **architecture, services, communication flow, databases, and infra** for the social-media-backend project. Use it as a master reference while building or onboarding new developers.
-
+This document explains the **architecture, services, communication flow, databases, and infra** for the social-media-backend project.
 ---
 
 ## 🏗 High-Level Architecture
