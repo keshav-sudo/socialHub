@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/config/redisClient.ts","./src/utils/dotenv.ts"],"version":"5.9.2"}
