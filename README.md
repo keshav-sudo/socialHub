@@ -21,6 +21,35 @@ Srv   Srv           Srv              Srv           Srv
 PG+R  PG+R          Mongo+S3+R       PG+R+Kafka    PG+R+MQ
 ```
 
+| Service          | Communicates With                         | Communication Method / Protocol           |
+| ---------------- | ----------------------------------------- | ----------------------------------------- |
+| **Auth**         | All services (User, Post, Feed, Chat, VC) | gRPC (JWT validation, auth)               |
+| **User**         | Auth                                      | gRPC (JWT validation)                     |
+|                  | Feed                                      | Direct DB query or gRPC / API calls       |
+|                  | Notification                              | gRPC / API calls                          |
+|                  | Chat                                      | gRPC / API calls                          |
+|                  | VC                                        | gRPC / API calls                          |
+| **Post**         | Feed                                      | Kafka (publishes `new_post` events)       |
+|                  | Notification                              | RabbitMQ (publishes `new_post` events)    |
+|                  | User                                      | gRPC / API calls                          |
+|                  | Auth                                      | gRPC (JWT validation)                     |
+| **Feed**         | Post                                      | Kafka (consumes `new_post` events)        |
+|                  | User                                      | gRPC / DB queries                         |
+|                  | Redis                                     | Caching feeds                             |
+|                  | Auth                                      | gRPC (JWT validation)                     |
+| **Notification** | Post                                      | RabbitMQ (consumes `new_post` events)     |
+|                  | Chat                                      | RabbitMQ (consumes `new_message` events)  |
+|                  | User                                      | gRPC / DB queries                         |
+|                  | Auth                                      | gRPC (JWT validation)                     |
+| **Chat**         | Auth                                      | gRPC (JWT validation)                     |
+|                  | Notification                              | RabbitMQ (publishes `new_message` events) |
+|                  | User                                      | gRPC / DB queries                         |
+|                  | Redis                                     | Pub/Sub for realtime messaging            |
+| **VC**           | Auth                                      | gRPC (JWT validation)                     |
+|                  | User                                      | gRPC / DB queries                         |
+|                  | Redis                                     | Pub/Sub for realtime signaling            |
+
+
 * **Auth Service (Postgres + Redis)** → Login, register, JWT validation (exposed via gRPC for internal use).
 * **User Service (Postgres + Redis)** → User profiles, followers, caching.
 * **Post Service (MongoDB + S3 + Redis)** → Posts, media, publishes `new_post` events.
