@@ -27,6 +27,7 @@ model User {
   googleId       String?
   role           Role   @default(USER)
   avatar         String? 
+  isVerified     Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -8,6 +8,7 @@ interface DotenvConfig {
     REDIS_CLIENT: string;
     EMAIL_FROM: string;
     EMAIL_PASS: string;
+    OTP_EXPIRY_SECONDS: number;
 }
 
 export const Dotenvs: DotenvConfig = {
@@ -15,7 +16,9 @@ export const Dotenvs: DotenvConfig = {
     REDIS_PORT: process.env.REDIS_PORT ?  Number(process.env.REDIS_PORT) : 6379,
     REDIS_CLIENT: process.env.REDIS_CLIENT || "127.0.0.1",
     EMAIL_FROM: process.env.EMAIL_FROM || "",
-    EMAIL_PASS: process.env.EMAIL_PASS || ""
+    EMAIL_PASS: process.env.EMAIL_PASS || "",
+    OTP_EXPIRY_SECONDS: process.env.OTP_EXPIRY_SECONDS ? Number(process.env.OTP_EXPIRY_SECONDS) : 300
 };
 
 
+console.log(Dotenvs);

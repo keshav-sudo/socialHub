@@ -1,5 +1,5 @@
 import { Redis } from "ioredis";
-import { Dotenvs } from "../utils/dotenv.js";
+import { Dotenvs } from "../types/dotenv.js";
 const redisClient = new Redis({
     port: Dotenvs.REDIS_PORT,
     host: Dotenvs.REDIS_CLIENT
