@@ -1,4 +1,4 @@
-const genrateOtp = (length: number = 6) => {
+const genrateOtp = (length: number = 6) : string => {
   const digits = '0123456789';
   let otp = '';
 
@@ -6,7 +6,7 @@ const genrateOtp = (length: number = 6) => {
     otp += digits[Math.floor(Math.random() * 10)];
   }
 
-  console.log(otp);
+  return otp;
 };
 
 

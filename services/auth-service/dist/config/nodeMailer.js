@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
         pass: PASS
     },
 });
-transporter.verify((error, success) => {
+transporter.verify((error) => {
     if (error) {
         console.error("Error connecting to SMTP:", error);
     }

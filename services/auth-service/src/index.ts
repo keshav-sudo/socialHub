@@ -14,6 +14,11 @@ app.get('/' , (req : Request, res : Response) => {
     res.send("Your Server Is on");
 })
 
+app.get("/read-cookie", (req, res) => {
+  const token = req.cookies.token; 
+  res.send(`Token: ${token}`);
+});
+
 const server:http.Server = app.listen( PORT , ()=> {
      console.log(`Server is running on http://localhost:${PORT}`);
 })

@@ -8,6 +8,10 @@ app.use(express.json());
 app.get('/', (req, res) => {
     res.send("Your Server Is on");
 });
+app.get("/read-cookie", (req, res) => {
+    const token = req.cookies.token;
+    res.send(`Token: ${token}`);
+});
 const server = app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });

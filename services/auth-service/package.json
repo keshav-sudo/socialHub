@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc -b && node dist/index.js"
+    "start": "tsc -b && node dist/index.js",
+    "lint": "eslint '**/*.{ts,js}' --fix",
+    "lint:check": "eslint '**/*.{ts,js}'"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +19,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/nodemailer": "^7.0.1",
     "bcrypt": "^6.0.0",
+    "cookie-js": "^0.0.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
@@ -24,15 +27,25 @@
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.6",
-    "redis": "^5.8.2"
+    "redis": "^5.8.2",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
+    "@eslint/js": "^9.35.0",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.4.0",
+    "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.43.0"
   }
 }
