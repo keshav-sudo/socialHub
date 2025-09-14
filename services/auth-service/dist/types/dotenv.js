@@ -8,5 +8,4 @@ export const Dotenvs = {
     EMAIL_PASS: process.env.EMAIL_PASS || "",
     OTP_EXPIRY_SECONDS: process.env.OTP_EXPIRY_SECONDS ? Number(process.env.OTP_EXPIRY_SECONDS) : 300
 };
-console.log(Dotenvs);
 //# sourceMappingURL=dotenv.js.map

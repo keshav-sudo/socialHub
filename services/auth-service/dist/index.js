@@ -1,10 +1,12 @@
 import express from "express";
 import redisClient from "./config/redisClient.js";
 import cookieParser from "cookie-parser";
+import authRoutes from "./routes/user.route.js";
 const app = express();
 const PORT = 5000;
 app.use(cookieParser());
 app.use(express.json());
+app.use("/api/v1/auth", authRoutes);
 app.get('/', (req, res) => {
     res.send("Your Server Is on");
 });

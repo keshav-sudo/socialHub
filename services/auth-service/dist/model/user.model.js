@@ -8,4 +8,15 @@ export const loginBody = z.object({
     email: z.email(),
     password: z.string().min(6).max(30),
 });
+export const resetPassBody = z.object({
+    email: z.email(),
+});
+export const resetPass = z.object({
+    email: z.email(),
+    newPassword: z.string().min(6).max(30)
+});
+export const verifyOtpBody = z.object({
+    email: z.email(),
+    otp: z.string().length(6)
+});
 //# sourceMappingURL=user.model.js.map

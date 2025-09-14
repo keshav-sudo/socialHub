@@ -13,7 +13,7 @@ const getOtpFromRedis = async (email: string): Promise<string | null> => {
 };
 
 const verifyOtp = async (email: string, inputOtp: string): Promise<boolean> => {
-  const storeOtp = await getOtpFromRedis(`otp${email}`);
+  const storeOtp = await getOtpFromRedis(email); // just pass email, no prefix
   if (!storeOtp) return false;
   return storeOtp === inputOtp;
 };

@@ -13,4 +13,17 @@ export const generateToken = (Payload) => {
         throw new Error("Token generation failed");
     }
 };
+export const decodeToken = (token) => {
+    if (!Dotenvs.JWT_SECRET) {
+        throw new Error("JWT_SECRET is not defined");
+    }
+    try {
+        const decoded = jwt.verify(token, Dotenvs.JWT_SECRET);
+        return decoded;
+    }
+    catch (error) {
+        console.error("Error verifying token:", error);
+        return null;
+    }
+};
 //# sourceMappingURL=jwtHelper.js.map

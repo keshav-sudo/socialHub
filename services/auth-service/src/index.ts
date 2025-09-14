@@ -4,11 +4,14 @@ import type { Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import http from "http";
 
+import authRoutes from "./routes/user.route.js"
+
 const app = express();
 const PORT = 5000;
 
 app.use(cookieParser());
 app.use(express.json());
+app.use("/api/v1/auth" , authRoutes);
 
 app.get('/' , (req : Request, res : Response) => {
     res.send("Your Server Is on");

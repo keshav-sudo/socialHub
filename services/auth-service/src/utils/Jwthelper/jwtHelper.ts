@@ -14,3 +14,16 @@ export const generateToken = (Payload: Payload): string => {
         throw new Error("Token generation failed");
     }
 }
+
+export const decodeToken = (token: string): Payload | null => {
+    if (!Dotenvs.JWT_SECRET) {
+        throw new Error("JWT_SECRET is not defined");
+    }
+    try {
+        const decoded = jwt.verify(token, Dotenvs.JWT_SECRET) as Payload;
+        return decoded;
+    } catch (error) {
+        console.error("Error verifying token:", error);
+        return null;
+    }
+}
