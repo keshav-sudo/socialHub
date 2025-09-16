@@ -20,6 +20,10 @@ Auth  User          Post             Feed          Notification
 Srv   Srv           Srv              Srv           Srv
 PG+R  PG+R          Mongo+S3+R       PG+R+Kafka    PG+R+MQ
 ```
+<img width="1394" height="827" alt="image" src="https://github.com/user-attachments/assets/baa351c9-b474-477b-9af0-d6e22b26d84a" />
+ExcaliDraw Link : https://excalidraw.com/#json=JBxqwMuW_JseSTBSfuiKw,BN5Jm57Iu_ASLuLZAueziA
+
+
 
 | Service          | Communicates With                         | Communication Method / Protocol           |
 | ---------------- | ----------------------------------------- | ----------------------------------------- |
