@@ -8,7 +8,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use("/api/v1/auth", authRoutes);
 app.get('/', (req, res) => {
-    res.send("Your Server Is on");
+    res.send("Your Server Is on 5000");
 });
 app.get("/read-cookie", (req, res) => {
     const token = req.cookies.token;

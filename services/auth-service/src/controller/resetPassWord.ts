@@ -110,15 +110,11 @@ export const verifyPassResetOtp = async (req: Request, res: Response) => {
     };
 
     const resetToken = generateToken(PayloadReset);
-    res.cookie("resetToken", resetToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 10 * 60 * 1000,
-    });
+
     return res.status(200).json({
       success: true,
       message: "OTP verified, you can now reset your password",
+      resetToken: resetToken,
     });
   } catch (error) {
     return res.status(500).json({
