@@ -49,12 +49,6 @@ export const signupController = async(req: Request, res : Response) => {
         }
 
         const token = generateToken(PayloadBody);
-        res.cookie("token" , token , {
-            httpOnly : true,
-            secure : process.env.NODE_ENV === "production",
-            sameSite : "lax",
-            maxAge : 7 * 24 * 60 * 60 * 1000
-        })
 
         return res.status(201).json({ 
             success : true,
@@ -65,7 +59,8 @@ export const signupController = async(req: Request, res : Response) => {
                 email : newUser.email,
                 isVerified : newUser.isVerified,
                 role : newUser.role
-            }
+            },
+            token : token
           })
 
 
