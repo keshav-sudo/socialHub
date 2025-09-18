@@ -12,18 +12,18 @@ COPY . .
 
 RUN npm run build
 
+RUN npm prune --production
+
 FROM node:20-alpine3.22 AS runner
 
 WORKDIR /app
-COPY package.json package-lock.json ./
 
-RUN npm install --production
-
-COPY dist ./dist
-COPY prisma ./prisma
+COPY --from=builder /builds/dist ./dist
+COPY --from=builder /builds/node_modules ./node_modules
+COPY --from=builder /builds/prisma ./prisma
+COPY --from=builder /builds/package.json ./package.json
 
 RUN npx prisma generate
 
-EXPOSE 5000
 
 CMD ["npm"  , "start"]
