@@ -19,9 +19,8 @@ message LoginRequest {
 message LoginResponse {
   bool success = 1;
   string message = 2;
-  string access_token = 3;
-  string refresh_token = 4;
-  User user = 5;
+  string token = 3; 
+  User user = 4;
 }
 
 message RegisterRequest {
@@ -41,5 +40,5 @@ message User {
   string name = 2;
   string email = 3;
   string role = 4;
-  int64 created_at = 5;
+  bool is_verified = 5; 
 }
