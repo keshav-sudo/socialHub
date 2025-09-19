@@ -7,13 +7,17 @@
     "build": "tsc -b",
     "start": "node dist/index.js",
     "lint": "eslint '**/*.{ts,js}' --fix",
-    "lint:check": "eslint '**/*.{ts,js}'"
+    "lint:check": "eslint '**/*.{ts,js}'",
+    "proto:clean": "rm -rf ../../shared/generated/*",
+    "proto:generate": "npm run proto:clean && mkdir -p ../../shared/generated && grpc_tools_node_protoc --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts --ts_out=grpc_js:../../shared/generated --js_out=import_style=commonjs,binary:../../shared/generated --grpc_out=grpc_js:../../shared/generated -I ../../shared/protos ../../shared/protos/*.proto"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/proto-loader": "^0.8.0",
     "@prisma/client": "^6.15.0",
     "@types/dotenv": "^6.1.1",
     "@types/js-cookie": "^3.0.6",
@@ -26,6 +30,7 @@
     "ioredis": "^5.7.0",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.1",
     "nodemailer": "^7.0.6",
     "redis": "^5.8.2",
     "zod": "^4.1.8"
@@ -36,15 +41,18 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.3.1",
+    "@types/node": "^24.5.2",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.4.0",
+    "grpc_tools_node_protoc_ts": "^5.3.3",
+    "grpc-tools": "^1.13.0",
     "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
+    "ts-proto": "^2.7.7",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.43.0"
   }

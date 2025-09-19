@@ -1,38 +1,24 @@
-import express from "express";
-import redisClient from "./config/redisClient.js";
-import type { Request, Response } from "express";
-import http from "http";
+import pkg from "../../../shared/generated/auth_grpc_pb.js"
+import * as grpc from "@grpc/grpc-js";
+import { loginHandler } from "./controller/login.js";
 
-import authRoutes from "./routes/user.route.js"
-
-const app = express();
-const PORT = 5000;
+import { signupController } from "./controller/signup.js";
 
 
-app.use(express.json());
-app.use("/api/v1/auth" , authRoutes);
+const server = new grpc.Server();
 
-app.get('/' , (res : Response) => {
-    res.send("Your Server Is on 5000");
-})
-
+server.addService(pkg.AuthServiceService as any , {
+    Login: loginHandler,
+});
 
 
-const server:http.Server = app.listen( PORT , ()=> {
-     console.log(`Server is running on http://localhost:${PORT}`);
-})
-
-const shutdown = async() => {
-    console.log("\n ⏳ Shutting down...");
-    server.close(async ()=> {
-        console.log("🛑 HTTP server closed");
-    })
-    await redisClient.quit();
-    console.log("🔌 Redis connection closed");
-    process.exit(0);
-
-}
-
-
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
+const PORT = 50051;
+server.bindAsync(
+  `0.0.0.0:${PORT}`,
+  grpc.ServerCredentials.createInsecure(),
+  (err, port) => {
+    if (err) throw err;
+    console.log(`AuthService gRPC server running on port ${port}`);
+    server.start();
+  }
+);

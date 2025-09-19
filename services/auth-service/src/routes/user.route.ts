@@ -2,7 +2,7 @@ import { Router } from "express";
 const router = Router();
 
 import { 
-    loginController,
+  
     signupController,
     requestPassReset,
     verifyPassResetOtp,
@@ -10,7 +10,6 @@ import {
 } from "../controller/index.js"
 
 
-router.post("/login", loginController);
 router.post("/signup", signupController);
 
 router.post("/request-password-reset", requestPassReset);
