@@ -12,7 +12,7 @@ const PORT = 5000;
 app.use(express.json());
 app.use("/api/v1/auth" , authRoutes);
 
-app.get('/' , (req: Request ,res : Response) => {
+app.get('/' , (res : Response) => {
     res.send("Your Server Is on 5000");
 })
 
