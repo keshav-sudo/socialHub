@@ -3,7 +3,7 @@ import { Dotenvs } from "../types/dotenv.js";
 
 
 const redisClient = new Redis ({
-    port : Dotenvs.REDIS_PORT,
+    port : Dotenvs.REDIS_PORT ,
     host : Dotenvs.REDIS_CLIENT
 });
 

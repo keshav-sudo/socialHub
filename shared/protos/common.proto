@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package common;
+
+option go_package = "github.com/yourorg/yourproject/proto/common";
+
+message Empty {}
+
+message Status {
+  int32 code = 1;
+  string message = 2;
+}
