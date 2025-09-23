@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>File Upload Example</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <h1>Upload File to Server</h1>
+
+  <input type="file" id="fileInput" />
+  <button id="uploadBtn">Upload</button>
+
+  <p id="status"></p>
+  <img id="uploadedImg" src="" alt="Uploaded Image" style="max-width: 400px; display: none;" />
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const status = document.getElementById("status");
+    const uploadedImg = document.getElementById("uploadedImg");
+
+    uploadBtn.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please select a file first");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        status.textContent = "Uploading...";
+        const response = await axios.post("http://localhost:5000/api/test/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          },
+          onUploadProgress: (progressEvent) => {
+            const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            status.textContent = `Uploading... ${percent}%`;
+          }
+        });
+
+        status.textContent = "Upload successful!";
+        const fileUrl = response.data.url;
+        uploadedImg.src = fileUrl;
+        uploadedImg.style.display = "block";
+        console.log("Cloudinary URL:", fileUrl);
+
+      } catch (err) {
+        console.error("Upload failed:", err);
+        status.textContent = "Upload failed. Check console.";
+      }
+    });
+  </script>
+</body>
+</html>
