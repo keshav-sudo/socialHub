@@ -6,7 +6,9 @@ import {
     signupController,
     requestPassReset,
     verifyPassResetOtp,
-    resetPassword
+    resetPassword,
+    verifyUser
+    
 } from "../controller/index.js"
 
 
@@ -16,5 +18,7 @@ router.post("/signup", signupController);
 router.post("/request-password-reset", requestPassReset);
 router.post("/verify-reset-otp/:email", verifyPassResetOtp);
 router.post("/reset-password", resetPassword);
+
+router.get("/verify-user" ,verifyUser )
 
 export default router;
