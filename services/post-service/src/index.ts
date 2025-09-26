@@ -1,7 +1,7 @@
 import express, {  Request,  Response } from "express";
 import http from "http"
 import { Router } from "express";
-import Posttest from "./utils/multerRoute.js"
+import PostRoutes from "../src/routes/post.routes.js"
 import cors from "cors";
 
 const app = express();
@@ -16,7 +16,7 @@ app.get('/' , (req: Request, res : Response) => {
     res.send("Your Server Is on 5000");
 })
 
-app.use('/api/test' , Posttest);  
+app.use('api/v1/posts/' , PostRoutes);  
 
 
 
