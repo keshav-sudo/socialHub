@@ -1,11 +1,12 @@
 import express, {  Request,  Response } from "express";
 import http from "http"
 import { Router } from "express";
-import PostRoutes from "../src/routes/post.routes.js"
+import dotenvVar from "./types/Dotenv.js";
+import PostRoutes from "./routes/post.routes.js"
 import cors from "cors";
 
 const app = express();
-const PORT = 5000;
+const PORT = dotenvVar.PORT;
 
 app.use(cors());
 app.use(Router());
