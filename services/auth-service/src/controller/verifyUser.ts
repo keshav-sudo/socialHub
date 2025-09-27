@@ -14,7 +14,7 @@ export const verifyUser = async (req: Request, res: Response, next: NextFunction
         if (!decoded) {
             return res.status(401).end();
         }
-        res.setHeader('X-User-Payload', JSON.stringify(decoded));
+        res.setHeader('x-user-payload', JSON.stringify(decoded));
         return res.status(200).end();
 
     } catch (error: any) {
