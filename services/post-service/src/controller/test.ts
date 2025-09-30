@@ -4,7 +4,7 @@ import { success } from "zod";
 
 export const test = async(req :Request , res:Response) => {
     try {
-      const payloadString = req.headers['x-user-payload']; 
+      const payloadString = req.headers['x-user-payload'] as string; 
        if (!payloadString) {
             return res.status(403).json({
                 success: false,
