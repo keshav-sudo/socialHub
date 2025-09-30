@@ -14,15 +14,18 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "prisma": "^6.16.2"
+    "prisma": "^6.16.2",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.3",
     "@types/multer": "^2.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
+    "express": "^5.1.0",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "zod": "^4.1.11"

@@ -9,16 +9,11 @@ const app = express();
 const PORT = dotenvVar.PORT;
 
 app.use(cors());
-app.use(Router());
+// app.use(Router()); // Hata diya - yeh unnecessary hai
 app.use(express.json());
 
-
-app.get('/' , (req: Request, res : Response) => {
-    res.send("Your Server Is on 5000");
-})
-
-app.use('api/v1/posts/' , PostRoutes);  
-
+// ✅ FIX: Trailing slash lagaya to match Nginx's location /posts/
+app.use('/posts/' , PostRoutes);  
 
 
 const server:http.Server = app.listen( PORT , ()=> {
