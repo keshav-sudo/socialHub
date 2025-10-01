@@ -1,39 +1,84 @@
-// import express  from "express";
-// import {Request, Response} from "express";
-// import { PostValidation } from "../types/zodType.js";
-// import prisma from "../config/prismaClient.js";
+import { Request, Response } from "express";
+import { PostValidation } from "../types/zodType.js";
+import prisma from "../config/prismaClient.js";
 
-// const createPost = async( req :Request, res:Response) => {
-//     try {
-//         if (!req.userId) {
-//         return res.status(401).json({ message: "Authentication required (Missing userId)." });
-//         }
+export const createPost = async (req: Request, res: Response) => {
+  const userData = req.headers["x-user-payload"];
+  if (!userData) {
+    return res.status(403).json({
+      success: false,
+      message: "Authentication payload missing in header.",
+    });
+  }
 
-//         const data = PostValidation.safeParse(req.body);
-//         if(data.success === false){
-//             return res.status(400).json({message: data.error.message});
-//         }
-//         const imageUrls = req.files as Express.Multer.File[] | undefined;
-//         if(!imageUrls || imageUrls.length === 0){
-//             return res.status(400).json({message: "At least one image is required"});
-//         }
+  try {
+    let user;
+    try {
+      user = JSON.parse(userData as string);
+      if (!user?.id) {
+        throw new Error("Invalid user payload");
+      }
+    } catch (err) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid authentication payload format.",
+      });
+    }
 
-//         const images = imageUrls.map((file)=> file.path);
-//         const imagePublicIds = imageUrls.map((file)=> file.filename);
 
-//         const post = await prisma.post.create({
-//             data : {
-//                 authorId : req.userId,
-//                 caption : data.caption ?? null,
-//                 content : data.content ?? null,
-//                 hastags : data.hashtags ?? [],
-//                 imageUrls : images,
-//                 imagePublicIds : imagePublicIds,
+    const postData = PostValidation.safeParse(req.body);
+    const imageUrls : string[] = [];
+    const imagePublicIds : string[] = [];
 
-//             }
-//         })
-    
-//     } catch (error) {
-        
-//     }
-// }
+    if(req.files && Array.isArray(req.files)) {
+        for(const file of req.files as any) {
+            if(file.path && file.filename){
+                  imageUrls.push(file.path);
+                  imagePublicIds.push(file.filename);
+            }
+        }
+    }
+        else if (req.file) {
+        const file = req.file as any;
+        if (file.path && file.filename) {
+             imageUrls.push(file.path);
+             imagePublicIds.push(file.filename);
+        }
+    }
+
+
+    if (!postData.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid post data",
+        errors: postData.error.format(), // cleaner error formatting
+      });
+    }
+
+    const newPost = await prisma.post.create({
+      data: {
+        caption: postData.data.caption!,
+        content: postData.data.content!,
+        imageUrls : imageUrls!,
+        imagePublicIds : imagePublicIds!,
+        authorId: user.id,
+        hashtags : postData.data.hashtags!
+      },
+    });
+
+    console.log("Post created:", newPost);
+
+    return res.status(201).json({
+      success: true,
+      message: "Post created successfully",
+      post: newPost,
+    });
+  } catch (error: any) {
+    console.error("Error creating post:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+

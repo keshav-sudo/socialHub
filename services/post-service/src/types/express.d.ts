@@ -9,10 +9,15 @@ declare global {
             
             // Field for multiple file uploads (upload.array)
             files?: Multer.File[]; 
-            
-            // Add your custom middleware-injected fields here:
-            userId?: string; 
             validatedBody?: any; 
+            user?: {
+                id: string,
+                role: string,
+                email: string,
+                isVerified: boolean,
+                iat: number,
+            }
+            
         }
     }
 }

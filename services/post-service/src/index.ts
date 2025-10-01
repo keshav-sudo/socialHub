@@ -11,10 +11,9 @@ const PORT = dotenvVar.PORT;
 app.use(cors());
 // app.use(Router()); // Hata diya - yeh unnecessary hai
 app.use(express.json());
-
+app.use(express.urlencoded({ extended: true })); 
 // ✅ FIX: Trailing slash lagaya to match Nginx's location /posts/
-app.use('/posts/' , PostRoutes);  
-
+app.use('/api/v1/posts/' , PostRoutes);  
 
 const server:http.Server = app.listen( PORT , ()=> {
      console.log(`Server is running on http://localhost:${PORT}`);
