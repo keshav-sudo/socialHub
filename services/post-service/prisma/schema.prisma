@@ -4,7 +4,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -13,7 +12,7 @@ datasource db {
 }
 
 model Post {
-  id              String   @id @default(cuid()) @map("_id") @db.ObjectId
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
   authorId        String   // Assuming Auth Service uses String ID
   
   // Content Fields
@@ -30,10 +29,15 @@ model Post {
   
   // Discovery & Categorization
   hashtags        String[] @default([]) // <--- Corrected name from 'hastags' to 'hashtags'
+
+  //status
+  isActive        Boolean @default(true)
+  isDeleted       Boolean @default(false)
   
   // Metadata
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  
 
   @@index([authorId])
   @@index([hashtags]) // <--- Corrected name from 'hastags' to 'hashtags'
