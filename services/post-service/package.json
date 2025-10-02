@@ -14,7 +14,7 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "prisma": "^6.16.2",
+    "prisma": "^6.16.3",
     "typescript": "^5.9.2"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "kafkajs": "^2.2.4",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "zod": "^4.1.11"

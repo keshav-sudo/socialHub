@@ -1,0 +1,44 @@
+// services/post-service/prisma/schema.prisma
+
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Post {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  authorId String // Assuming Auth Service uses String ID
+
+  // Content Fields
+  caption String?
+  content String?
+
+  // AI-Generated Fields
+  aicaption String?
+  aiContent String?
+
+  // Image Data
+  imageUrls      String[] @default([])
+  imagePublicIds String[] @default([])
+
+  // Discovery & Categorization
+  hashtags String[] @default([]) // <--- Corrected name from 'hastags' to 'hashtags'
+
+  //status
+  isActive  Boolean @default(true)
+  isDeleted Boolean @default(false)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([hashtags]) // <--- Corrected name from 'hastags' to 'hashtags'
+}
