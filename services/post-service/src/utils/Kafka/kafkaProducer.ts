@@ -5,7 +5,10 @@ const BROKERS :string[] = dotenvVar.KAFKA_BROKER.split(",");
 const CLIENTID :string = dotenvVar.KAFKA_CLIENT_ID;
 const kafka = new Kafka({
     clientId: CLIENTID,
-    brokers: BROKERS 
+    brokers: BROKERS,
+    retry: {
+        retries: 5
+    }
 })
 
 const producer = kafka.producer();

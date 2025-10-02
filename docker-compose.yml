@@ -4,7 +4,7 @@ services:
   gateway:
     image: nginx:latest
     ports:
-      - "8080:80" 
+      - "8080:80"
     volumes:
       - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
@@ -15,7 +15,7 @@ services:
   # The service name was changed from user-service to auth-service
   auth-service:
     build: ./services/auth-service
-    ports: 
+    ports:
       - "5000:5000"
     env_file:
       - ./services/auth-service/.env
@@ -31,6 +31,7 @@ services:
       - ./services/post-service/.env
     depends_on:
       - redis
+      - kafka
     networks:
       - socialhub-network
 
@@ -40,13 +41,22 @@ services:
       - socialhub-network
 
   kafka:
-    image: apache/kafka-native
+    image: apache/kafka-native:latest
     networks:
       - socialhub-network
     ports:
       - "9092:9092"
     environment:
-      - KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_PROCESS_ROLES: 'broker,controller' 
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093' 
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    restart: always
+
 networks:
   socialhub-network:
     name: socialhub-network
+    driver: bridge
