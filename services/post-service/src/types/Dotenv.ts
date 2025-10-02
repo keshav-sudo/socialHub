@@ -7,6 +7,8 @@ interface Dotenv {
     CLOUDINARY_CLOUD_NAME: string;
     CLOUDINARY_API_KEY: string;
     CLOUDINARY_API_SECRET: string;
+    KAFKA_BROKER: string;
+    KAFKA_CLIENT_ID:string;
 }
 
 const dotenvVar : Dotenv = {
@@ -15,6 +17,8 @@ const dotenvVar : Dotenv = {
     CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || "",
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || "",
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || "", 
+    KAFKA_BROKER: process.env.KAFKA_BROKER || "",
+    KAFKA_CLIENT_ID: process.env.KAFKA_CLIENT_ID || "",
 }
 
 console.log(dotenvVar);
