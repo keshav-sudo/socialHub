@@ -26,27 +26,24 @@ export const createPost = async (req: Request, res: Response) => {
       });
     }
 
-
     const postData = PostValidation.safeParse(req.body);
-    const imageUrls : string[] = [];
-    const imagePublicIds : string[] = [];
+    const imageUrls: string[] = [];
+    const imagePublicIds: string[] = [];
 
-    if(req.files && Array.isArray(req.files)) {
-        for(const file of req.files as any) {
-            if(file.path && file.filename){
-                  imageUrls.push(file.path);
-                  imagePublicIds.push(file.filename);
-            }
-        }
-    }
-        else if (req.file) {
-        const file = req.file as any;
+    if (req.files && Array.isArray(req.files)) {
+      for (const file of req.files as any) {
         if (file.path && file.filename) {
-             imageUrls.push(file.path);
-             imagePublicIds.push(file.filename);
+          imageUrls.push(file.path);
+          imagePublicIds.push(file.filename);
         }
+      }
+    } else if (req.file) {
+      const file = req.file as any;
+      if (file.path && file.filename) {
+        imageUrls.push(file.path);
+        imagePublicIds.push(file.filename);
+      }
     }
-
 
     if (!postData.success) {
       return res.status(400).json({
@@ -60,27 +57,25 @@ export const createPost = async (req: Request, res: Response) => {
       data: {
         caption: postData.data.caption!,
         content: postData.data.content!,
-        imageUrls : imageUrls!,
-        imagePublicIds : imagePublicIds!,
+        imageUrls: imageUrls!,
+        imagePublicIds: imagePublicIds!,
         authorId: user.id,
-        hashtags : postData.data.hashtags!
+        hashtags: postData.data.hashtags!,
       },
     });
 
-    try {
-      const eventSend = await sendEvent("POST_TOPIC" , "post.created", {
-        postId : newPost.id,
-        authorId : newPost.authorId
+    const eventSend = sendEvent("POST_TOPIC", "post.created", {
+      postId: newPost.id,
+      authorId: newPost.authorId,
+    })
+      .then((result) => {
+        console.log("✅ Event sent successfully:", result);
       })
-       if (!eventSend) {
-       return res.status(400).json({ message: "Error while sending post event" });
-       }
-       console.log("event sended", eventSend);
-    } catch (error) {
-       console.error("Event send failed:", error);
-       return res.status(500).json({ message: "Internal server error" });
-    }
+      .catch((error) => {
+        console.error("❌ Event send failed (non-blocking):", error);
+      });
 
+    console.log("event sent: ", eventSend);
     return res.status(201).json({
       success: true,
       message: "Post created successfully",
@@ -94,4 +89,3 @@ export const createPost = async (req: Request, res: Response) => {
     });
   }
 };
-
