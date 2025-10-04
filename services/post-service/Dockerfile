@@ -1,4 +1,4 @@
-FROM node:20-alpine3.22  AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /builds
 
@@ -6,7 +6,10 @@ COPY package.json package.json
 COPY package-lock.json package-lock.json
 
 
-RUN npm install
+RUN npm install \
+    --fetch-retries 5 \
+    --fetch-timeout 600000 \
+    --fetch-retry-maxtimeout 120000
 
 COPY . .
 

@@ -18,7 +18,7 @@ export const connectProducer = async() => {
      console.log('✅ Kafka Producer connected.');
 }
 
-export const sendEvent = async( topic :string, eventType:string, data:object) => {
+export const sendEvent = async( topic :string, eventType:string, data:object): Promise<boolean> => {
     const message = {
     eventType,
     timestamp: new Date().toISOString(),
@@ -29,9 +29,11 @@ export const sendEvent = async( topic :string, eventType:string, data:object) =>
           await producer.send({
           topic: topic,
           messages: [{ value: JSON.stringify(message) }],
-          });      
+          });
+          return true;
     } catch (error) {
         console.error(`❌ Failed to send event to ${topic}: ${eventType}`, error);
+        return false;
 
     }
 }

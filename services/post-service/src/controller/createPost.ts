@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { PostValidation } from "../types/zodType.js";
 import prisma from "../config/prismaClient.js";
+import { sendEvent } from "../utils/Kafka/kafkaProducer.js";
 
 export const createPost = async (req: Request, res: Response) => {
   const userData = req.headers["x-user-payload"];
@@ -66,7 +67,19 @@ export const createPost = async (req: Request, res: Response) => {
       },
     });
 
-    console.log("Post created:", newPost);
+    try {
+      const eventSend = await sendEvent("POST_TOPIC" , "post.created", {
+        postId : newPost.id,
+        authorId : newPost.authorId
+      })
+       if (!eventSend) {
+       return res.status(400).json({ message: "Error while sending post event" });
+       }
+       console.log("event sended", eventSend);
+    } catch (error) {
+       console.error("Event send failed:", error);
+       return res.status(500).json({ message: "Internal server error" });
+    }
 
     return res.status(201).json({
       success: true,
