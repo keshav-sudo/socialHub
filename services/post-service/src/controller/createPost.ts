@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { PostValidation } from "../types/zodType.js";
 import prisma from "../config/prismaClient.js";
+import { sendEvent } from "../utils/Kafka/kafkaProducer.js";
 
 export const createPost = async (req: Request, res: Response) => {
   const userData = req.headers["x-user-payload"];
@@ -25,27 +26,24 @@ export const createPost = async (req: Request, res: Response) => {
       });
     }
 
-
     const postData = PostValidation.safeParse(req.body);
-    const imageUrls : string[] = [];
-    const imagePublicIds : string[] = [];
+    const imageUrls: string[] = [];
+    const imagePublicIds: string[] = [];
 
-    if(req.files && Array.isArray(req.files)) {
-        for(const file of req.files as any) {
-            if(file.path && file.filename){
-                  imageUrls.push(file.path);
-                  imagePublicIds.push(file.filename);
-            }
-        }
-    }
-        else if (req.file) {
-        const file = req.file as any;
+    if (req.files && Array.isArray(req.files)) {
+      for (const file of req.files as any) {
         if (file.path && file.filename) {
-             imageUrls.push(file.path);
-             imagePublicIds.push(file.filename);
+          imageUrls.push(file.path);
+          imagePublicIds.push(file.filename);
         }
+      }
+    } else if (req.file) {
+      const file = req.file as any;
+      if (file.path && file.filename) {
+        imageUrls.push(file.path);
+        imagePublicIds.push(file.filename);
+      }
     }
-
 
     if (!postData.success) {
       return res.status(400).json({
@@ -59,15 +57,25 @@ export const createPost = async (req: Request, res: Response) => {
       data: {
         caption: postData.data.caption!,
         content: postData.data.content!,
-        imageUrls : imageUrls!,
-        imagePublicIds : imagePublicIds!,
+        imageUrls: imageUrls!,
+        imagePublicIds: imagePublicIds!,
         authorId: user.id,
-        hashtags : postData.data.hashtags!
+        hashtags: postData.data.hashtags!,
       },
     });
 
-    console.log("Post created:", newPost);
+    const eventSend = sendEvent("POST_TOPIC", "post.created", {
+      postId: newPost.id,
+      authorId: newPost.authorId,
+    })
+      .then((result) => {
+        console.log("✅ Event sent successfully:", result);
+      })
+      .catch((error) => {
+        console.error("❌ Event send failed (non-blocking):", error);
+      });
 
+    console.log("event sent: ", eventSend);
     return res.status(201).json({
       success: true,
       message: "Post created successfully",
@@ -81,4 +89,3 @@ export const createPost = async (req: Request, res: Response) => {
     });
   }
 };
-

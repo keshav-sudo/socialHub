@@ -1,8 +1,17 @@
+# Project-specific ignored files
+node_modules
+.env
+/dist
+
+# Ignore all generated files (Prisma, etc.)
+/generated
+# Ignore directories inside the post-service folder
+/post-service/dist
+/post-service/node_modules
+/post-service/generated
+
 node_modules
 # Keep environment variables out of version control
 .env
 
-/src/generated/prisma
-
-/dist
-/src/generated/prisma
+/generated/prisma
