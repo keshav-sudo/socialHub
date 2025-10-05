@@ -1,4 +1,4 @@
-import { Kafka } from "kafkajs";
+import { Kafka, Partitioners } from "kafkajs";
 import dotenvVar from "../../types/Dotenv.js";
 
 const BROKERS :string[] = dotenvVar.KAFKA_BROKER.split(","); 
@@ -11,7 +11,9 @@ const kafka = new Kafka({
     }
 })
 
-const producer = kafka.producer();
+const producer = kafka.producer({
+    createPartitioner: Partitioners.LegacyPartitioner
+});
 
 export const connectProducer = async() => {
      await producer.connect();

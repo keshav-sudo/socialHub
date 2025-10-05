@@ -11,8 +11,9 @@ services:
       - socialhub-network
     depends_on:
       - auth-service
+      - post-service
+      - notification-service
 
-  # The service name was changed from user-service to auth-service
   auth-service:
     build: ./services/auth-service
     ports:
@@ -23,6 +24,7 @@ services:
       - redis
     networks:
       - socialhub-network
+
   post-service:
     build: ./services/post-service
     ports:
@@ -35,10 +37,26 @@ services:
     networks:
       - socialhub-network
 
+  notification-service:
+    build: ./services/notification-service
+    ports:
+      - "5002:5002"
+    env_file:
+      - ./services/notification-service/.env
+    depends_on:
+      - kafka
+    networks:
+      - socialhub-network
+
   redis:
     image: redis:alpine
     networks:
       - socialhub-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
 
   kafka:
     image: apache/kafka:3.7.1
@@ -54,7 +72,7 @@ services:
       - CLUSTER_ID=5L6g3nShT-eMCtK--X86sw
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER 
       - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
-      - KAFKA_LISTENERS=PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_LOG_DIRS=/tmp/kraft-combined-logs
