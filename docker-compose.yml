@@ -11,6 +11,8 @@ services:
       - socialhub-network
     depends_on:
       - auth-service
+      - post-service
+      - notification-service
 
   # The service name was changed from user-service to auth-service
   auth-service:
@@ -23,6 +25,7 @@ services:
       - redis
     networks:
       - socialhub-network
+
   post-service:
     build: ./services/post-service
     ports:
