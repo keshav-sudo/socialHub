@@ -7,6 +7,7 @@ interface Dotenvs {
     KAFKA_BROKER : string;
     KAFKA_CLIENT_ID: string;
     GROUP_ID: string;
+    TOPICS: string[];
 }
 
 const dotenvVar : Dotenvs = {
@@ -14,7 +15,8 @@ const dotenvVar : Dotenvs = {
     PORT: Number(process.env.PORT) || 5002, // Changed default to 5002 to match .env
     KAFKA_BROKER: process.env.KAFKA_BROKER || "", 
     KAFKA_CLIENT_ID: process.env.KAFKA_CLIENT_ID || "",
-    GROUP_ID : process.env.GROUP_ID || ""
+    GROUP_ID : process.env.GROUP_ID || "",
+    TOPICS: (process.env.KAFKA_TOPICS || "").split(",").filter(t => t.trim() !== "")
 }
 
 console.log(dotenvVar);

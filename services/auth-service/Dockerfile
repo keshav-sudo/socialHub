@@ -6,7 +6,10 @@ COPY package.json package.json
 COPY package-lock.json package-lock.json
 
 
-RUN npm install
+RUN npm install \
+    --fetch-retries 5 \
+    --fetch-timeout 600000 \
+    --fetch-retry-maxtimeout 120000
 
 COPY . .
 
@@ -25,5 +28,6 @@ COPY --from=builder /builds/node_modules ./node_modules
 COPY --from=builder /builds/prisma ./prisma
 COPY --from=builder /builds/package.json ./package.json
 COPY --from=builder /builds/generated ./generated
+
 
 CMD ["npm"  , "start"]
