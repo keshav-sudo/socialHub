@@ -12,7 +12,6 @@ export const startNotificationConsumer = async () => {
   }
 
   await consumer.subscribe({ topics: TOPICS, fromBeginning: true });
-
   console.log(`👂 Kafka Consumer is listening on topics: ${TOPICS.join(", ")}`);
 
   await consumer.run({
@@ -24,13 +23,20 @@ export const startNotificationConsumer = async () => {
         const messageValue = message.value?.toString();
         if (!messageValue) return;
 
+        // [DEBUG] Log the raw string before parsing (keep this for now)
+        console.log(`[DEBUG] Raw Kafka Message Value: ${messageValue}`);
         const event = JSON.parse(messageValue);
-        const { eventType, ...data } = event;
-
+        const { eventType, data: eventPayload, ...rest } = event; // <-- FIX IS HERE!
+        // We explicitly destructure 'data' as 'eventPayload'.
+        // The rest of the event (like 'timestamp') is stored in 'rest' if needed.
+        if (!eventPayload) {
+            console.error(`[FATAL] Missing event payload (key 'data') for eventType: ${eventType}`);
+            return;
+        }
         switch (topic) {
           case "POST_TOPIC":
             if (eventType === "post.created") {
-              success = await handlePostcreated(data);
+              success = await handlePostcreated(eventPayload);
             } else {
               console.log(`[${topic}] Ignoring eventType: ${eventType}`);
             }
@@ -50,6 +56,7 @@ export const startNotificationConsumer = async () => {
           `❌ FATAL ERROR in processing message from ${topic}:`,
           error
         );
+        console.error(`❌ Message that failed to parse: ${message.value?.toString()}`);
       }
     },
   });

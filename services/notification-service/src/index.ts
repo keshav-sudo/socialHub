@@ -2,14 +2,14 @@ import { Response, Request } from "express";
 import express from "express";
 import dotenvVar from "./types/Dotenv.js";
 import { startNotificationConsumer } from "./consumers/kafkaConsumer.js";
-import notifyRoutes from "../src/routes/post.route.js"
+import notifyRoutes from "./routes/post.route.js"
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/notify/", notifyRoutes)
 
-const TARGET_TOPIC = 'POST_TOPIC';
+const TARGET_TOPIC = dotenvVar.TOPICS;
 
 
 const startServerAndConsumer = async() => {
