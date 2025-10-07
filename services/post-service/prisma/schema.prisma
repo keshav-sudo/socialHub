@@ -1,7 +1,3 @@
-// services/post-service/prisma/schema.prisma
-
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -13,33 +9,51 @@ datasource db {
 }
 
 model Post {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  authorId        String   // Assuming Auth Service uses String ID
-  
-  // Content Fields
-  caption         String?
-  content         String?
-  
-  // AI-Generated Fields
-  aicaption       String?
-  aiContent       String?
-  
-  // Image Data
-  imageUrls       String[]  @default([]) 
-  imagePublicIds  String[] @default([]) 
-  
-  // Discovery & Categorization
-  hashtags        String[] @default([]) // <--- Corrected name from 'hastags' to 'hashtags'
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorId       String
+  caption        String?
+  content        String?
+  aicaption      String?
+  aiContent      String?
+  imageUrls      String[] @default([])
+  imagePublicIds String[] @default([])
+  hashtags       String[] @default([])
 
-  //status
-  isActive        Boolean @default(true)
-  isDeleted       Boolean @default(false)
-  
-  // Metadata
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  comments       Comment[]
+  likes          Like[]
+
+  isActive       Boolean  @default(true)
+  isDeleted      Boolean  @default(false)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([authorId])
-  @@index([hashtags]) // <--- Corrected name from 'hastags' to 'hashtags'
+  @@index([hashtags])
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  post      Post?    @relation(fields: [postId], references: [id]) 
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+  isDelete  Boolean  @default(false)
+
+  @@index([postId])
+}
+
+model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  post      Post?    @relation(fields: [postId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
+  isDeleted Boolean  @default(false)
+
+  @@unique([postId, userId])
 }

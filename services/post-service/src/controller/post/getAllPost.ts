@@ -1,10 +1,9 @@
-import prisma from "../config/prismaClient.js";
+import prisma from "../../config/prismaClient.js";
 import { Request, Response } from "express";
 
 export const getAllPosts = async (req: Request, res: Response) => {  
     try {
         const userDetails = req.headers["x-user-payload"];
-        console.log("User Details from Header:", userDetails);
         if (!userDetails) {
             return res.status(403).json({
                 success: false,

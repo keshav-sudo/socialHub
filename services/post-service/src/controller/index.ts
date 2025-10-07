@@ -1,13 +1,27 @@
-import  {createPost } from "./createPost.js";
-import { getAllPosts } from "./getAllPost.js";
-import { test } from "./test.js";
-import { UpdatePost } from "./updatePost.js";
-import { deletePost } from "./DeletePost.js";
+import  {createPost } from "./post/createPost.js";
+import { getAllPosts } from "./post/getAllPost.js";
+import { test } from "./post/test.js";
+import {getPost} from "./post/getPost.js"
+import { UpdatePost } from "./post/updatePost.js";
+import { deletePost } from "./post/DeletePost.js";
+import {createComment} from "./comment/createComment.js";
+import {deleteComment} from "./comment/deleteComment.js";
+import {updateComment} from "./comment/updateComment.js";
+import { getComments } from "./comment/getComment.js";
+import {createDisLike} from "./like/disLike.js"
+import {createLike} from "./like/likeCreate.js"
 
 export default {
     createPost,
     getAllPosts,
     test,
     UpdatePost,
-    deletePost
+    deletePost,
+    createComment,
+    deleteComment,
+    updateComment,
+    getPost,
+    createDisLike,
+    createLike,
+    getComments
 }

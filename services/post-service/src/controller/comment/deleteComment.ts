@@ -1,25 +1,22 @@
+import prisma from "../../config/prismaClient.js";
 import { Request, Response } from "express";
-import prisma from "../config/prismaClient.js";
 
-export const deletePost = async (req: Request, res: Response) => {
+export const deleteComment = async (req: Request,res: Response) => {
   const userData = req.headers["x-user-payload"];
-
   if (!userData) {
     return res.status(403).json({
       success: false,
-      message: "Authentication payload missing in header.",
+      message: "unAuthorized",
     });
   }
-
   try {
-    const postId = req.params.id;
-    if (!postId) {
+    const commentId = req.params.id;
+    if (!commentId) {
       return res.status(400).json({
         success: false,
         message: "Add PostId in params",
       });
     }
-
     const user = JSON.parse(userData as string);
     const userId = user.id;
 
@@ -30,36 +27,47 @@ export const deletePost = async (req: Request, res: Response) => {
       });
     }
 
-    const deletedPost = await prisma.post.updateMany({
-      where: {
+    const findComment = await prisma.comment.findFirst({
+      where : {
+        id: commentId,
         authorId: userId,
-        id: postId,
+        isActive: false,
+        isDelete: true,
+      }
+    })
+    if(findComment){
+      return res.status(200).json({
+        success : true,
+        messgae : "already deleted"
+      })
+    }
+    const deleteComment = await prisma.comment.update({
+      where: {
+        id: commentId,
+        authorId: userId,
         isActive: true,
-        isDeleted: false,
+        isDelete: false,
       },
       data: {
         isActive: false,
-        isDeleted: true,
+        isDelete: true,
       },
     });
-
-    if (deletedPost.count === 0) {
-      return res.status(404).json({
+    if (!deleteComment) {
+      return res.status(400).json({
         success: false,
-        message: "Post not found or already deleted",
+        message: "comment not delete",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Post deleted successfully",
+      data: deleteComment,
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       success: false,
-      message: "Something went wrong",
-      error: error ,
+      message: "internal error from delete comment",
     });
   }
 };
