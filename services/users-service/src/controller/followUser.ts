@@ -73,7 +73,7 @@ export const followUser = async (req: Request, res: Response) => {
         messgae : "error while following"
       })
     }
-    console.log("followed SuccessFully");
+    console.log("followed SuccessFully ",!event);
 
     return res.status(200).json({
         success : true,

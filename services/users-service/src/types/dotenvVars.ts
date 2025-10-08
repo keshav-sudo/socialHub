@@ -16,7 +16,7 @@ export const dotenvVars: dotenvInterface = {
   PASSWORD: process.env.PASSWORD || "",
   KAFKA_BROKER: process.env.KAFKA_BROKER || "",
   KAFKA_CLIENT_ID: process.env.KAFKA_CLIENT_ID || "",
-  PORT: Number(process.env.PORT) || 5004,
+  PORT: Number(process.env.PORT) || 5003,
 };
 
-console.log(dotenvVars);
+

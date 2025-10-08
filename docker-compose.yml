@@ -48,11 +48,9 @@ services:
       - socialhub-network
 
   users-service:
-    # --- CHANGE 1: Corrected 'service' to 'services' ---
     build: ./services/users-service
     ports:
       - "5003:5003"
-    # --- CHANGE 2: Corrected env_file to point to the actual file ---
     env_file:
       - ./services/users-service/.env 
     depends_on: 

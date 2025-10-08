@@ -4,10 +4,6 @@ interface postCreated {
     postId : string;
     authorId : string;
 }
-interface commentCreated {
-    postId : string;
-    authorId : string;
-}
 
 const handlePostcreated = async({postId , authorId} :postCreated): Promise<boolean> => {
     try {
@@ -42,8 +38,5 @@ const handlePostcreated = async({postId , authorId} :postCreated): Promise<boole
     }
 }
 
-const handleCommentcreated = async() => {
-
-}
 
 export default handlePostcreated;
