@@ -4,6 +4,10 @@ interface postCreated {
     postId : string;
     authorId : string;
 }
+interface commentCreated {
+    postId : string;
+    authorId : string;
+}
 
 const handlePostcreated = async({postId , authorId} :postCreated): Promise<boolean> => {
     try {
@@ -19,7 +23,6 @@ const handlePostcreated = async({postId , authorId} :postCreated): Promise<boole
 
         const notificationinsert = await prisma.notifications.create({
             data: {
-                // Notifying the author that they created a post (Self-notification)
                 userId: authorId,
                 triggeredById: authorId, 
                 type: "POST",
@@ -38,4 +41,9 @@ const handlePostcreated = async({postId , authorId} :postCreated): Promise<boole
         return false
     }
 }
+
+const handleCommentcreated = async() => {
+
+}
+
 export default handlePostcreated;

@@ -1,15 +1,16 @@
 import { Kafka, Partitioners } from "kafkajs";
-import dotenvVar from "../../types/Dotenv.js";
+import { dotenvVars } from "../types/dotenvVars.js";
 
-const BROKERS :string[] = dotenvVar.KAFKA_BROKER.split(","); 
-const CLIENTID :string = dotenvVar.KAFKA_CLIENT_ID;
+const BROKERS = dotenvVars.KAFKA_BROKER.split(",");
+const CLIENTID: string = dotenvVars.KAFKA_CLIENT_ID;
 const kafka = new Kafka({
-    clientId: CLIENTID,
-    brokers: BROKERS,
-    retry: {
-        retries: 5
-    }
-})
+  clientId: CLIENTID,
+  brokers: BROKERS,
+  retry: {
+    retries: 5,
+  },
+});
+
 
 const producer = kafka.producer({
     createPartitioner: Partitioners.DefaultPartitioner
@@ -17,7 +18,7 @@ const producer = kafka.producer({
 
 export const connectProducer = async() => {
      await producer.connect();
-     console.log('✅ Kafka Producer connected in post service');
+     console.log('✅ Kafka Producer connected in follow service.');
 }
 
 export const sendEvent = async( topic :string, eventType:string, data:object): Promise<boolean> => {
