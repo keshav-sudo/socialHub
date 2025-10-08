@@ -19,7 +19,6 @@ const handlePostcreated = async({postId , authorId} :postCreated): Promise<boole
 
         const notificationinsert = await prisma.notifications.create({
             data: {
-                // Notifying the author that they created a post (Self-notification)
                 userId: authorId,
                 triggeredById: authorId, 
                 type: "POST",
@@ -38,4 +37,6 @@ const handlePostcreated = async({postId , authorId} :postCreated): Promise<boole
         return false
     }
 }
+
+
 export default handlePostcreated;

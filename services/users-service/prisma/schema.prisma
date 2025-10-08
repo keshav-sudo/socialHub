@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id        String   @id 
+  followers Follow[] @relation("UserFollowers")
+  following Follow[] @relation("UserFollowing")
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+
+  followerId  String
+  follower    User     @relation("UserFollowing", fields: [followerId], references: [id])
+
+  followingId String
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id])
+  
+  isActive  Boolean @default(true)
+  isDeleted  Boolean @default(false)
+  @@unique([followerId, followingId]) 
+  @@index([followingId]) 
+  @@index([followerId]) 
+}
