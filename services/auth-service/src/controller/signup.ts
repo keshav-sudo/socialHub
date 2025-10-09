@@ -18,10 +18,11 @@ export const signupController = async(req: Request, res : Response) => {
             })
         }
 
-        const {name , email , password} = parsedBody.data;
+        const {name , email , password, username} = parsedBody.data;
         const existingUser = await prisma.user.findUnique({
             where : {
-                email : email
+                email : email,
+                username : username
             }
         })
         if(existingUser){
@@ -36,6 +37,7 @@ export const signupController = async(req: Request, res : Response) => {
             data : {
                 name,
                 email,
+                username,
                 password : hashedPassword,
                 isVerified : false
             }
@@ -43,6 +45,7 @@ export const signupController = async(req: Request, res : Response) => {
 
         const PayloadBody : Payload = {
             id : newUser.id,
+            username : newUser.username,
             role : newUser.role,
             email : newUser.email,
             isVerified : newUser.isVerified
@@ -57,6 +60,7 @@ export const signupController = async(req: Request, res : Response) => {
                 id : newUser.id,
                 name : newUser.name,
                 email : newUser.email,
+                username : newUser.username,
                 isVerified : newUser.isVerified,
                 role : newUser.role
             },
