@@ -7,7 +7,8 @@ import {
     requestPassReset,
     verifyPassResetOtp,
     resetPassword,
-    verifyUser
+    verifyUser,
+    checkUsernameAvailability
     
 } from "../controller/index.js"
 
@@ -20,5 +21,6 @@ router.post("/verify-reset-otp/:email", verifyPassResetOtp);
 router.post("/reset-password", resetPassword);
 
 router.get("/verify-user" ,verifyUser )
+router.post("/check/:username" , checkUsernameAvailability)
 
 export default router;
