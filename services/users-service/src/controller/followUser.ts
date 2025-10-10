@@ -59,8 +59,8 @@ export const followUser = async (req: Request, res: Response) => {
 
 
     const event = await sendEvent("USER_TOPIC", "follow.created", {
-      user_id: userId,
-      following_id: targetId,
+      authorId: userId,
+      followingId: targetId,
     });
     
     if (!event) {
