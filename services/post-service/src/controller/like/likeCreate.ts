@@ -39,7 +39,7 @@ export const createLike = async (req: Request, res: Response) => {
   
     likeRecord = await prisma.$transaction(async (tx) => {
       const existingLike = await tx.like.findFirst({
-        where: { userId: userId, postId: postId, authorUsername: username },
+        where: { userId: userId, postId: postId },
       });
 
       if (existingLike) {
