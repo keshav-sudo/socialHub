@@ -67,7 +67,7 @@ export const createPost = async (req: Request, res: Response) => {
     try {
       const result = await sendEvent("POST_TOPIC", "post.created", {
         postId: newPost.id,
-        authorUsername: newPost.authorUsername,
+        username: newPost.authorUsername,
         authorId: newPost.authorId,
       });
       console.log("✅ Event sent successfully:", result);
