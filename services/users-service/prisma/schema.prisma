@@ -15,6 +15,7 @@ datasource db {
 }
 model User {
   id        String   @id 
+  username  String?   @unique
   followers Follow[] @relation("UserFollowers")
   following Follow[] @relation("UserFollowing")
 }

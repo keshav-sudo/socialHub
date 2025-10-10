@@ -21,8 +21,9 @@ export const createComment = async (req: Request,res: Response) => {
     }
     const user = JSON.parse(userData as string);
     const userId = user.id;
+    const username = user.username;
 
-    if (!userId) {
+    if (!userId || !username) {
       return res.status(400).json({
         success: false,
         message: "Invalid user payload",
@@ -38,6 +39,7 @@ export const createComment = async (req: Request,res: Response) => {
     const addComment = await prisma.comment.create({
       data: {
         content: commentdata.data.content,
+        authorUsername : username,
         postId: postId,
         authorId: userId,
       },
@@ -50,6 +52,7 @@ export const createComment = async (req: Request,res: Response) => {
     }
     const eventProduce = await sendEvent("POST_TOPIC", "comment.created", {
       commentId: addComment.id,
+      authorUsername : addComment.authorUsername,
       postId: addComment.postId,
       authorId: addComment.authorId,
       createdAt : addComment.createdAt
@@ -66,6 +69,10 @@ export const createComment = async (req: Request,res: Response) => {
     return res.status(200).json({
       success: true,
       data: addComment,
+      author : {
+        id : addComment.authorId,
+        
+      }
     });
   } catch (error) {
     return res.status(500).json({

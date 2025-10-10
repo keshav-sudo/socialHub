@@ -13,6 +13,7 @@ declare global {
             user?: {
                 id: string,
                 role: string,
+                authorUsername: string,
                 email: string,
                 isVerified: boolean,
                 iat: number,

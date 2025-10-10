@@ -17,8 +17,8 @@ export const createLike = async (req: Request, res: Response) => {
   try {
     const user = JSON.parse(userData as string);
     const userId = user.id;
-
-    if (!userId) {
+    const username = user.username;
+    if (!userId || !username) {
       return res.status(401).json({
         success: false,
         message: "Invalid authentication payload.",
@@ -39,7 +39,7 @@ export const createLike = async (req: Request, res: Response) => {
   
     likeRecord = await prisma.$transaction(async (tx) => {
       const existingLike = await tx.like.findFirst({
-        where: { userId: userId, postId: postId },
+        where: { userId: userId, postId: postId, authorUsername: username },
       });
 
       if (existingLike) {
@@ -55,10 +55,9 @@ export const createLike = async (req: Request, res: Response) => {
         });
       }
       
-      // Case 3: Create New Like (This event WILL be pushed to Kafka)
       eventType = "like.created";
       return await tx.like.create({
-        data: { postId: postId, userId: userId, isActive: true, isDeleted: false },
+        data: { postId: postId, userId: userId, authorUsername:username, isActive: true, isDeleted: false },
       });
     });
 
@@ -67,7 +66,6 @@ export const createLike = async (req: Request, res: Response) => {
             likeId: likeRecord.id,
             postId: likeRecord.postId,
             userId: likeRecord.userId,
-            createdAt: likeRecord.createdAt,
         })
         .then((result) => {
             console.log(`✅ Event ${eventType} for like: ${result}`);
