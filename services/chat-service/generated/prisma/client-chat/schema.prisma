@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma/client-chat"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL_1")
+}
+
+enum ChatType {
+  SINGLE
+  GROUP
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model Message {
+  id        String        @id @map("_id") @db.ObjectId
+  roomId    String        @map("conversation_id")
+  chatType  ChatType      @map("chat_type")
+  senderId  String        @map("sender_id")
+  targetId  String        @map("target_id")
+  content   String
+  timestamp DateTime      @default(now())
+  status    MessageStatus @default(SENT)
+
+  @@index([roomId, timestamp])
+  @@map("messages")
+}
