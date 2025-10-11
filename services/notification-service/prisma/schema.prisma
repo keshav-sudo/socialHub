@@ -15,6 +15,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 enum NotificationType {
   POST
   CONNECTION
@@ -22,11 +23,18 @@ enum NotificationType {
   PROFILE
 }
 
+
 model Notifications {
   id        String           @id @default(auto()) @map("_id") @db.ObjectId
   userId    String
-  triggeredById String
+  username  String?
+  postId    String?
+  commentId String?
+  likeId    String?
+  followerId String?
+  followingId String?
   type      NotificationType
+  triggeredById String
   message   String
   link      String ?
   is_read   Boolean          @default(false)

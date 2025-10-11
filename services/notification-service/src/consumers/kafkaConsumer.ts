@@ -1,8 +1,14 @@
-import handlePostcreated from "./handler.js";
+import {
+  handlePostcreated,
+  handleCommentCreate,
+  handleFollowCreate,
+  handleLikecreate,
+} from "./handler.js";
+
 import { consumer, connectConsumer } from "../utils/Kafka/kafkaClient.js";
 import dotenvVar from "../types/Dotenv.js";
 
-const TOPICS = dotenvVar.TOPICS
+const TOPICS = dotenvVar.TOPICS;
 
 export const startNotificationConsumer = async () => {
   const isConnected = await connectConsumer();
@@ -15,47 +21,61 @@ export const startNotificationConsumer = async () => {
   console.log(`👂 Kafka Consumer is listening on topics: ${TOPICS.join(", ")}`);
 
   await consumer.run({
-    eachMessage: async (payload) => {
-      const { topic, message } = payload;
+    eachMessage: async ({ topic, message }) => {
       let success = false;
 
       try {
         const messageValue = message.value?.toString();
         if (!messageValue) return;
 
-        // [DEBUG] Log the raw string before parsing (keep this for now)
         console.log(`[DEBUG] Raw Kafka Message Value: ${messageValue}`);
+
         const event = JSON.parse(messageValue);
-        const { eventType, data: eventPayload, ...rest } = event; // <-- FIX IS HERE!
-        // We explicitly destructure 'data' as 'eventPayload'.
-        // The rest of the event (like 'timestamp') is stored in 'rest' if needed.
+        const { eventType, data: eventPayload } = event;
+
         if (!eventPayload) {
-            console.error(`[FATAL] Missing event payload (key 'data') for eventType: ${eventType}`);
-            return;
+          console.error(`[FATAL] Missing 'data' field in event payload for eventType: ${eventType}`);
+          return;
         }
+
         switch (topic) {
           case "POST_TOPIC":
-            if (eventType === "post.created") {
-              success = await handlePostcreated(eventPayload);
+            switch (eventType) {
+              case "post.created":
+                success = await handlePostcreated(eventPayload);
+                break;
+              case "comment.created":
+                success = await handleCommentCreate(eventPayload);
+                break;
+              case "like.created":
+                success = await handleLikecreate(eventPayload);
+                break;
+              default:
+                console.log(`[${topic}] Ignoring eventType: ${eventType}`);
+                break;
+            }
+            break;
+
+          case "USER_TOPIC":
+            if (eventType === "follow.created") {
+              success = await handleFollowCreate(eventPayload);
             } else {
               console.log(`[${topic}] Ignoring eventType: ${eventType}`);
             }
             break;
+
           default:
             console.log(`[ALERT] Unhandled topic received: ${topic}`);
             break;
         }
 
         if (success) {
-          console.log(
-            `✅ Event processed and offset handled for ${eventType} on ${topic}.`
-          );
+          console.log(`✅ Event processed successfully: ${eventType} (Topic: ${topic})`);
+        } else {
+          console.warn(`⚠️ Event failed or returned false: ${eventType} (Topic: ${topic})`);
         }
       } catch (error) {
-        console.error(
-          `❌ FATAL ERROR in processing message from ${topic}:`,
-          error
-        );
+        console.error(`❌ FATAL ERROR processing Kafka message from ${topic}:`, error);
         console.error(`❌ Message that failed to parse: ${message.value?.toString()}`);
       }
     },

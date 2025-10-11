@@ -16,7 +16,7 @@ export const createPost = async (req: Request, res: Response) => {
     let user;
     try {
       user = JSON.parse(userData as string);
-      if (!user?.id) {
+      if (!user?.id || !user?.username) {
         throw new Error("Invalid user payload");
       }
     } catch (err) {
@@ -49,7 +49,7 @@ export const createPost = async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         message: "Invalid post data",
-        errors: postData.error.format(), 
+        errors: postData.error.format(),
       });
     }
 
@@ -57,28 +57,32 @@ export const createPost = async (req: Request, res: Response) => {
       data: {
         caption: postData.data.caption!,
         content: postData.data.content!,
+        authorUsername: user.username,
         imageUrls: imageUrls!,
         imagePublicIds: imagePublicIds!,
         authorId: user.id,
         hashtags: postData.data.hashtags!,
       },
     });
-
-    const eventSend = await sendEvent("POST_TOPIC", "post.created", {
-      postId: newPost.id,
-      authorId: newPost.authorId,
-    })
-      .then((result) => {
-        console.log("✅ Event sent successfully:", result);
-      })
-      .catch((error) => {
-        console.error("❌ Event send failed (non-blocking):", error);
+    try {
+      const result = await sendEvent("POST_TOPIC", "post.created", {
+        postId: newPost.id,
+        username: newPost.authorUsername,
+        authorId: newPost.authorId,
       });
-      
+      console.log("✅ Event sent successfully:", result);
+    } catch (error) {
+      console.error("❌ Event send failed (non-blocking):", error);
+    }
+
     return res.status(201).json({
       success: true,
       message: "Post created successfully",
       post: newPost,
+      authorUsername: {
+        id: newPost.authorId,
+        username: newPost.authorUsername,
+      },
     });
   } catch (error: any) {
     console.error("Error creating post:", error);

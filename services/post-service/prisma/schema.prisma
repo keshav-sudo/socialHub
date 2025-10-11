@@ -11,6 +11,7 @@ datasource db {
 model Post {
   id             String   @id @default(auto()) @map("_id") @db.ObjectId
   authorId       String
+  authorUsername String
   caption        String?
   content        String?
   aicaption      String?
@@ -35,6 +36,7 @@ model Post {
 model Comment {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   postId    String   @db.ObjectId
+  authorUsername  String
   post      Post?    @relation(fields: [postId], references: [id]) 
   authorId  String
   content   String
@@ -48,6 +50,7 @@ model Comment {
 
 model Like {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorUsername  String
   postId    String   @db.ObjectId
   post      Post?    @relation(fields: [postId], references: [id])
   userId    String

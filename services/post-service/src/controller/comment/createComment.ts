@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { commentValidation } from "../../types/zodType.js";
 import { sendEvent } from "../../utils/Kafka/kafkaProducer.js";
 
-export const createComment = async (req: Request,res: Response) => {
+export const createComment = async (req: Request, res: Response) => {
   const userData = req.headers["x-user-payload"];
   if (!userData) {
     return res.status(403).json({
@@ -21,13 +21,15 @@ export const createComment = async (req: Request,res: Response) => {
     }
     const user = JSON.parse(userData as string);
     const userId = user.id;
+    const username = user.username;
 
-    if (!userId) {
+    if (!userId || !username) {
       return res.status(400).json({
         success: false,
         message: "Invalid user payload",
       });
     }
+
     const commentdata = commentValidation.safeParse(req.body);
     if (!commentdata.success) {
       return res.status(400).json({
@@ -38,23 +40,33 @@ export const createComment = async (req: Request,res: Response) => {
     const addComment = await prisma.comment.create({
       data: {
         content: commentdata.data.content,
+        authorUsername: username,
         postId: postId,
         authorId: userId,
       },
     });
-    if (!addComment) {
+
+    const postUser = await prisma.post.findFirst({
+      where: { id: addComment.postId },
+      select: { authorId: true },
+    });
+
+    if (!addComment || !postUser) {
       return res.status(400).json({
         success: false,
         message: "comment not created",
       });
     }
+
     const eventProduce = await sendEvent("POST_TOPIC", "comment.created", {
       commentId: addComment.id,
-      postId: addComment.postId,
       authorId: addComment.authorId,
-      createdAt : addComment.createdAt
+      recipientId: postUser.authorId, 
+      authorUsername: addComment.authorUsername,
+      postId: addComment.postId,
+      createdAt: addComment.createdAt,
     });
-    console.log("event send successfully" , eventProduce)
+    console.log("event send successfully", eventProduce);
 
     if (!eventProduce) {
       return res.status(400).json({
@@ -66,6 +78,9 @@ export const createComment = async (req: Request,res: Response) => {
     return res.status(200).json({
       success: true,
       data: addComment,
+      author: {
+        id: addComment.authorId,
+      },
     });
   } catch (error) {
     return res.status(500).json({
