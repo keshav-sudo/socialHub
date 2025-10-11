@@ -17,7 +17,8 @@ interface CommentCreated {
 
 interface FollowCreated {
   followingId: string; // person being followed (recipient)
-  authorId: string; // follower
+  authorId: string;
+  newfollower: string; // follower
 }
 
 interface LikeCreated {
@@ -94,6 +95,7 @@ export const handleCommentCreate = async ({
 export const handleFollowCreate = async ({
   followingId,
   authorId,
+  newfollower
 }: FollowCreated): Promise<boolean> => {
   try {
     if (!followingId || !authorId) {
@@ -105,6 +107,7 @@ export const handleFollowCreate = async ({
       data: {
         userId: followingId,
         triggeredById: authorId,
+        username : newfollower,
         type: "ENGAGEMENT",
         message: "You have a new follower!",
       },

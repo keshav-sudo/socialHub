@@ -38,7 +38,6 @@ export const startNotificationConsumer = async () => {
           return;
         }
 
-        // 🔥 Main event router
         switch (topic) {
           case "POST_TOPIC":
             switch (eventType) {

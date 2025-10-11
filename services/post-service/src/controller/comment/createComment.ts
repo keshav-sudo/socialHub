@@ -50,17 +50,19 @@ export const createComment = async (req: Request, res: Response) => {
       where: { id: addComment.postId },
       select: { authorId: true },
     });
-    if (!addComment|| !postUser ) {
+
+    if (!addComment || !postUser) {
       return res.status(400).json({
         success: false,
         message: "comment not created",
       });
     }
+
     const eventProduce = await sendEvent("POST_TOPIC", "comment.created", {
       commentId: addComment.id,
-      authorId: addComment.authorId, // commenter’s ID
-      recipientId: postUser, // post owner’s ID
-      authorUsername: addComment.authorUsername, // commenter username
+      authorId: addComment.authorId,
+      recipientId: postUser.authorId, 
+      authorUsername: addComment.authorUsername,
       postId: addComment.postId,
       createdAt: addComment.createdAt,
     });

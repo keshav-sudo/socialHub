@@ -42,7 +42,7 @@ export const createLike = async (req: Request, res: Response) => {
     if (!postUser) {
       return res.status(400).json({
         success: false,
-        message: "comment not created",
+        message: "Post not founded",
       });
     }
 
@@ -78,7 +78,8 @@ export const createLike = async (req: Request, res: Response) => {
         },
       });
     });
-
+    console.log("event type h ");
+    console.log(eventType);
     if (eventType === "like.created") {
       sendEvent("POST_TOPIC", eventType, {
         likeId: likeRecord.id,
