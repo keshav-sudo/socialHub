@@ -5,14 +5,7 @@ export function setupSocketHandlers(io: SocketIOServer) {
   const chatService = new ChatService(io);
 
   io.on('connection', (socket: Socket) => {
-    console.log('Client connected:', socket.id);
-
-    // Handle authentication and user data
-    socket.on('authenticate', (data: { userId: string; username: string }) => {
-      socket.data.userId = data.userId;
-      socket.data.username = data.username;
-      console.log(`User authenticated: ${data.userId} (${data.username})`);
-    });
+    console.log('Client connected:', socket.id, 'User:', socket.data.userId);
 
     // Join a chat room
     socket.on('join_room', async (data: { roomId: string }) => {
@@ -81,8 +74,8 @@ export function setupSocketHandlers(io: SocketIOServer) {
     });
 
     // Handle disconnect
-    socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id);
+    socket.on('disconnect', (reason) => {
+      console.log('Client disconnected:', socket.id, 'Reason:', reason);
     });
   });
 
