@@ -1015,8 +1015,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-- **Backend Architect:** [Your Name]
-- **DevOps Engineer:** [Your Name]
+- **Backend Architect:  Keshav Sharma
+- **DevOps Engineer:** Keshav Sharma
 - **Contributors:** See [CONTRIBUTORS.md](CONTRIBUTORS.md)
 
 ---
