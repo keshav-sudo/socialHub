@@ -15,7 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/v1/posts/' , allRoutes.postRoutes);  
 app.use('/api/v1/posts/' , allRoutes.commentRoutes);  
-app.use('/api/v1/posts/' , allRoutes.likeRoutes);  
+app.use('/api/v1/posts/' , allRoutes.likeRoutes);
+app.use('/api/v1/ai/' , allRoutes.genAiRoutes);  
 
 connectProducer();
 

@@ -1,16 +1,45 @@
-# Post Service
+# 📝 Post Service
 
 ## Overview
-Manages posts, comments, likes/dislikes, and media uploads. Publishes events to Feed and Notification services for real-time updates. Handles rich media content with Cloudinary integration.
+Comprehensive post management service with AI-powered content generation, media uploads, comments, and social engagement features. Publishes events to Feed and Notification services for real-time updates with Cloudinary CDN integration for global media delivery.
+
+## 🌟 Key Features
+
+### Core Features
+- ✅ **Post Management**: Create, read, update, delete posts with rich content
+- ✅ **AI Content Generation**: Generate engaging post content and captions using Google Gemini AI
+- ✅ **Media Upload**: Cloudinary integration for images and videos with automatic optimization
+- ✅ **Comments System**: Nested comments with parent-child relationships
+- ✅ **Social Engagement**: Like/dislike with toggle support
+- ✅ **Hashtags**: Auto-extract and index hashtags for discovery
+- ✅ **Visibility Control**: Public, followers-only, and private posts
+- ✅ **Event Publishing**: Kafka integration for real-time notifications
+
+### AI-Powered Features 🤖
+- **Content Generation**: Generate detailed, engaging post content based on topic and tone
+- **Caption Generation**: Create catchy captions with relevant hashtags
+- **Smart Suggestions**: AI-powered content optimization
+- **Multi-tone Support**: Professional, casual, friendly, formal, and more
 
 ## Architecture
 
 ```
-Client → Gateway → Post Service → PostgreSQL (Prisma ORM)
-                                → Cloudinary (media storage)
-                                → Redis (cache - planned)
-                                → Kafka (publish post/comment/like events)
-                                → Auth Service (HTTP - token validation)
+                                    ┌─────────────────┐
+                                    │   API Gateway   │
+                                    └────────┬────────┘
+                                             │
+                                    ┌────────▼────────┐
+                                    │  Post Service   │
+                                    │   (Port 5001)   │
+                                    └────────┬────────┘
+                                             │
+        ┌────────────────┬───────────────────┼───────────────────┬──────────────┐
+        │                │                   │                   │              │
+┌───────▼──────┐  ┌──────▼──────┐  ┌────────▼────────┐  ┌──────▼──────┐  ┌───▼────┐
+│  MongoDB     │  │ Cloudinary  │  │  Google Gemini  │  │    Kafka    │  │ Redis  │
+│  (Posts,     │  │  (Media     │  │   (AI Content   │  │  (Events)   │  │(Cache) │
+│  Comments)   │  │   Storage)  │  │   Generation)   │  │             │  │ Future │
+└──────────────┘  └─────────────┘  └─────────────────┘  └─────────────┘  └────────┘
 ```
 
 ---
@@ -550,7 +579,8 @@ Authorization: Bearer <token>
 ## Technology Stack
 - **Runtime**: Node.js + TypeScript
 - **Framework**: Express.js
-- **Database**: PostgreSQL (via Prisma ORM)
+- **Database**: MongoDB (via Prisma ORM)
+- **AI Engine**: Google Gemini 1.5 Flash (via LangChain)
 - **Media Storage**: Cloudinary (CDN + transformations)
 - **File Upload**: Multer (multipart/form-data)
 - **Cache**: Redis (planned - for feed caching)
@@ -562,58 +592,172 @@ Authorization: Bearer <token>
 ## Port
 - **5001**: HTTP REST API
 
-## Database Schema (MongoDB)
+## Database Schema (MongoDB via Prisma)
 
 ### Posts Collection
-```javascript
-{
-  _id: ObjectId,
-  userId: String,        // User who created the post
-  username: String,
-  content: String,       // Post text content
-  mediaUrls: [String],   // Array of S3 URLs
-  mediaTypes: [String],  // ['image', 'video']
-  likes: Number,         // Like count
-  dislikes: Number,      // Dislike count
-  commentsCount: Number,
-  visibility: String,    // 'public', 'followers', 'private'
-  tags: [String],
-  createdAt: Date,
-  updatedAt: Date
+```prisma
+model Post {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorId       String
+  authorUsername String
+  caption        String?
+  content        String?
+  aicaption      String?   // AI-generated caption
+  aiContent      String?   // AI-generated content
+  imageUrls      String[] @default([])
+  imagePublicIds String[] @default([])
+  hashtags       String[] @default([])
+  
+  comments       Comment[]
+  likes          Like[]
+  
+  isActive       Boolean  @default(true)
+  isDeleted      Boolean  @default(false)
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([authorId])
+  @@index([hashtags])
 }
 ```
 
 ### Comments Collection
-```javascript
-{
-  _id: ObjectId,
-  postId: String,        // Reference to post
-  userId: String,
-  username: String,
-  content: String,
-  likes: Number,
-  parentCommentId: String,  // For nested comments
-  createdAt: Date,
-  updatedAt: Date
+```prisma
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.ObjectId
+  authorUsername  String
+  post      Post?    @relation(fields: [postId], references: [id]) 
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+  isDelete  Boolean  @default(false)
+  
+  @@index([postId])
 }
 ```
 
 ### Likes Collection
-```javascript
-{
-  _id: ObjectId,
-  postId: String,
-  userId: String,
-  type: String,          // 'like' or 'dislike'
-  createdAt: Date
+```prisma
+model Like {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  authorUsername  String
+  postId    String   @db.ObjectId
+  post      Post?    @relation(fields: [postId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
+  isDeleted Boolean  @default(false)
+  
+  @@unique([postId, userId])
 }
 ```
 
+### Key Schema Features
+- **AI Fields**: Separate storage for AI-generated vs user content
+- **Soft Delete**: isDeleted flag for data recovery
+- **Indexes**: Optimized queries on authorId and hashtags
+- **Relations**: Prisma manages MongoDB relationships
+- **Timestamps**: Automatic createdAt and updatedAt tracking
+
 ## API Endpoints
 
-### All endpoints require authentication
+### 🤖 AI Endpoints (No Authentication Required)
 
-#### 1. Test Endpoint
+#### 1. Generate AI Content
+Generate engaging post content using AI based on topic and tone.
+
+```http
+POST /api/v1/ai/generate-content
+Content-Type: application/json
+
+Request Body:
+{
+  "topic": "Climate Change Solutions",
+  "tone": "professional"
+}
+
+Response:
+{
+  "topic": "Climate Change Solutions",
+  "tone": "professional",
+  "content": "🌍 Addressing climate change requires immediate action... [AI-generated detailed content]"
+}
+```
+
+**Supported Tones:**
+- `professional` - Formal business tone
+- `casual` - Friendly and relaxed
+- `enthusiastic` - Excited and energetic
+- `informative` - Educational and factual
+- `inspirational` - Motivational and uplifting
+- `humorous` - Light and funny
+
+**Example cURL:**
+```bash
+curl -X POST http://localhost:5001/api/v1/ai/generate-content \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "Healthy Lifestyle Tips",
+    "tone": "casual"
+  }'
+```
+
+#### 2. Generate AI Caption
+Generate catchy captions with relevant hashtags for your posts.
+
+```http
+POST /api/v1/ai/generate-caption
+Content-Type: application/json
+
+Request Body:
+{
+  "topic": "Beach Sunset Photography"
+}
+
+Response:
+{
+  "topic": "Beach Sunset Photography",
+  "caption": "Golden hour magic at the beach 🌅✨ #BeachLife #SunsetVibes #Photography"
+}
+```
+
+**Features:**
+- Auto-generates 3 relevant hashtags
+- Optimized for social media engagement
+- Includes emojis when appropriate
+- Platform-agnostic (works for all social platforms)
+
+**Example cURL:**
+```bash
+curl -X POST http://localhost:5001/api/v1/ai/generate-caption \
+  -H "Content-Type: application/json" \
+  -d '{
+    "topic": "Morning Coffee"
+  }'
+```
+
+**AI Error Responses:**
+```json
+// Missing required fields
+{
+  "message": "Error: Topic, platform, and tone are required."
+}
+
+// Server error
+{
+  "message": "Server error: Failed to generate content."
+}
+```
+
+---
+
+### 📱 Post Endpoints (Authentication Required)
+
+#### 3. Test Endpoint
 ```http
 GET /api/v1/posts/test
 Authorization: Bearer <token>
@@ -624,7 +768,7 @@ Response:
 }
 ```
 
-#### 2. Create Post
+#### 4. Create Post
 ```http
 POST /api/v1/posts/
 Authorization: Bearer <token>
@@ -660,7 +804,7 @@ Response:
 }
 ```
 
-#### 3. Get All Posts (Feed)
+#### 5. Get All Posts (Feed)
 ```http
 GET /api/v1/posts/getall?page=1&limit=20&sort=recent
 Authorization: Bearer <token>
@@ -699,7 +843,7 @@ Response:
 }
 ```
 
-#### 4. Get Single Post
+#### 6. Get Single Post
 ```http
 GET /api/v1/posts/:id
 Authorization: Bearer <token>
@@ -727,7 +871,7 @@ Response:
 }
 ```
 
-#### 5. Update Post
+#### 7. Update Post
 ```http
 PATCH /api/v1/posts/:id
 Authorization: Bearer <token>
@@ -747,7 +891,7 @@ Response:
 }
 ```
 
-#### 6. Delete Post
+#### 8. Delete Post
 ```http
 DELETE /api/v1/posts/:id
 Authorization: Bearer <token>
@@ -759,7 +903,7 @@ Response:
 }
 ```
 
-#### 7. Add Comment
+#### 9. Add Comment
 ```http
 POST /api/v1/posts/comment/:id
 Authorization: Bearer <token>
@@ -786,7 +930,7 @@ Response:
 }
 ```
 
-#### 8. Get Comments
+#### 10. Get Comments
 ```http
 GET /api/v1/posts/comment/:id?page=1&limit=20
 Authorization: Bearer <token>
@@ -816,7 +960,7 @@ Response:
 }
 ```
 
-#### 9. Update Comment
+#### 11. Update Comment
 ```http
 PATCH /api/v1/posts/comment/:id
 Authorization: Bearer <token>
@@ -834,7 +978,7 @@ Response:
 }
 ```
 
-#### 10. Delete Comment
+#### 12. Delete Comment
 ```http
 DELETE /api/v1/posts/comment/:id
 Authorization: Bearer <token>
@@ -846,7 +990,7 @@ Response:
 }
 ```
 
-#### 11. Like Post
+#### 13. Like Post
 ```http
 POST /api/v1/posts/like/:id
 Authorization: Bearer <token>
@@ -860,7 +1004,7 @@ Response:
 }
 ```
 
-#### 12. Dislike Post (Toggle Like to Dislike)
+#### 14. Dislike Post (Toggle Like to Dislike)
 ```http
 PATCH /api/v1/posts/like/:id
 Authorization: Bearer <token>
@@ -881,13 +1025,16 @@ Response:
 PORT=5001
 NODE_ENV=production
 
-# Database (PostgreSQL via Prisma)
-DATABASE_URL=postgresql://user:password@postgres:5432/posts_db
+# Database (MongoDB)
+DATABASE_URL=mongodb+srv://user:password@cluster.mongodb.net/SocialHub
 
 # Cloudinary
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
+
+# Google Gemini AI
+GOOGLE_API_KEY=your-google-gemini-api-key
 
 # Kafka
 KAFKA_BROKER=kafka:9092
@@ -901,6 +1048,71 @@ MAX_FILES=10
 DEFAULT_PAGE_SIZE=20
 MAX_PAGE_SIZE=100
 ```
+
+---
+
+## 🤖 AI Content Generation Workflow
+
+### How AI Integration Works
+
+```
+User Request → Post Service → LangChain → Google Gemini → AI Response
+                                          (gemini-1.5-flash)
+```
+
+### Content Generation Flow
+```
+1. User provides:
+   - Topic: "Technology Trends"
+   - Tone: "professional"
+
+2. LangChain constructs prompt:
+   System: "You are a skilled Social Media Manager..."
+   Human: "Topic: Technology Trends\nTone: professional"
+
+3. Gemini AI generates:
+   - Detailed engaging content (200-500 words)
+   - Platform-optimized format
+   - Target audience consideration
+
+4. Post Service returns:
+   - Generated content
+   - Ready to use in post creation
+```
+
+### Caption Generation Flow
+```
+1. User provides:
+   - Topic: "Summer Beach Day"
+
+2. LangChain constructs prompt:
+   System: "You are a professional digital marketer..."
+   Human: "Topic: Summer Beach Day"
+
+3. Gemini AI generates:
+   - Catchy caption (1-2 sentences)
+   - Exactly 3 relevant hashtags
+   - Emoji integration
+
+4. Response example:
+   "Making waves and memories 🌊☀️ #BeachVibes #SummerDays #CoastalLife"
+```
+
+### AI Model Configuration
+- **Model**: Google Gemini 1.5 Flash
+- **Temperature**: 0.7 (balanced creativity)
+- **Max Tokens**: Auto (based on prompt)
+- **Language**: Multi-language support
+- **Response Time**: ~2-4 seconds
+
+### Use Cases
+1. **Content Creators**: Generate post ideas quickly
+2. **Businesses**: Create professional marketing content
+3. **Influencers**: Get caption suggestions with hashtags
+4. **Bloggers**: Draft initial content for posts
+5. **Social Media Managers**: Bulk content generation
+
+---
 
 ## Testing APIs
 
@@ -1149,20 +1361,39 @@ npm test
 
 ```json
 {
-  "express": "^4.18.2",
-  "mongoose": "^8.0.3",
-  "ioredis": "^5.3.2",
+  "express": "^5.1.0",
+  "@prisma/client": "^6.16.2",
   "kafkajs": "^2.2.4",
-  "multer": "^1.4.5-lts.1",
-  "aws-sdk": "^2.1498.0",
-  "@grpc/grpc-js": "^1.9.13",
-  "joi": "^17.11.0",
-  "sharp": "^0.33.0"
+  "multer": "^2.0.2",
+  "multer-storage-cloudinary": "^4.0.0",
+  "cors": "^2.8.5",
+  "dotenv": "^17.2.2",
+  "zod": "^4.1.11",
+  "@langchain/google-genai": "^0.2.18",
+  "@langchain/core": "^0.3.78"
 }
 ```
 
+### Key Dependencies Explained
+- **@langchain/google-genai**: Integration with Google Gemini AI models
+- **@langchain/core**: LangChain framework for AI prompt engineering
+- **multer-storage-cloudinary**: Direct Cloudinary upload from Multer
+- **kafkajs**: Apache Kafka client for event streaming
+- **@prisma/client**: MongoDB ORM with type safety
+
 ## Future Enhancements
 
+### AI Features
+- Multi-language content generation
+- Content style transfer
+- AI-powered content moderation
+- Sentiment analysis for posts
+- Auto-generate post variations
+- Image caption generation from uploaded photos
+- Hashtag trend prediction
+- Content optimization suggestions
+
+### Platform Features
 - Post scheduling
 - Video transcoding
 - Image compression and thumbnails
@@ -1173,3 +1404,5 @@ npm test
 - Location tagging
 - Mention users in posts
 - Share/repost functionality
+- Advanced content filtering
+- ML-based content recommendations
