@@ -36,17 +36,18 @@ A production-ready, horizontally scalable social media backend built with micros
 ┌───────▼───────┐ ┌───▼────────┐ ┌───▼────────┐ ┌───▼────────┐ ┌──▼───────┐
 │ Auth Service  │ │User Service│ │Post Service│ │Chat Service│ │Notify Srv│
 │   (5000)      │ │   (5003)   │ │   (5001)   │ │   (5004)   │ │  (5002)  │
-│ PostgreSQL    │ │PostgreSQL  │ │PostgreSQL  │ │Redis PubSub│ │ MongoDB  │
-│ Redis (OTP)   │ │Kafka Pub   │ │Cloudinary  │ │Socket.IO   │ │Kafka Sub │
-└───────────────┘ └────────────┘ │Kafka Pub   │ └────────────┘ └──────────┘
-                                  └────────────┘
-                                       │
-                      ┌────────────────┼────────────────┐
-                      │                │                │
-                 ┌────▼─────┐    ┌────▼─────┐    ┌────▼─────┐
-                 │PostgreSQL│    │  Kafka   │    │  Redis   │
-                 │ Database │    │ Cluster  │    │  Cache   │
-                 └──────────┘    └──────────┘    └──────────┘
+│ PostgreSQL    │ │PostgreSQL  │ │  MongoDB   │ │Redis PubSub│ │ MongoDB  │
+│ Redis (OTP)   │ │Kafka Pub   │ │ Cloudinary │ │Socket.IO   │ │Kafka Sub │
+│               │ │            │ │ Gemini AI  │ │            │ │          │
+└───────────────┘ └────────────┘ │ Kafka Pub  │ └────────────┘ └──────────┘
+                                  └─────┬──────┘
+                                        │
+               ┌────────────────────────┼────────────────────────┐
+               │                        │                        │
+          ┌────▼─────┐          ┌──────▼──────┐          ┌─────▼──────┐
+          │PostgreSQL│          │    Kafka    │          │Google Gemini│
+          │ Database │          │   Cluster   │          │  AI (API)   │
+          └──────────┘          └─────────────┘          └────────────┘
 ```
 
 **Architecture Diagram:**
