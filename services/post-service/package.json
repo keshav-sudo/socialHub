@@ -18,6 +18,8 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
+    "@langchain/core": "^0.3.78",
+    "@langchain/google-genai": "^0.2.18",
     "@prisma/client": "^6.16.2",
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
