@@ -45,8 +45,8 @@ A production-ready, horizontally scalable social media backend built with micros
                ┌────────────────────────┼────────────────────────┐
                │                        │                        │
           ┌────▼─────┐          ┌──────▼──────┐          ┌─────▼──────┐
-          │PostgreSQL│          │    Kafka    │          │Google Gemini│
-          │ Database │          │   Cluster   │          │  AI (API)   │
+          │PostgreSQL│          │    Kafka    │          │Redis PubSub│
+          │ Database │          │   Cluster   │          │  Cache     │
           └──────────┘          └─────────────┘          └────────────┘
 ```
 
