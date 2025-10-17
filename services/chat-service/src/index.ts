@@ -36,42 +36,20 @@ const io = new SocketIOServer(httpServer, {
 io.adapter(createAdapter(redisPublisher, redisSubscriber));
 
 
-// Socket.IO middleware for authentication
+// Socket.IO middleware for authentication (using nginx headers)
 io.use(async (socket, next) => {
   try {
-    const token = socket.handshake.auth.token || socket.handshake.headers.authorization;
+    // Get user payload from nginx header (set by nginx after auth verification)
+    const userPayloadHeader = socket.handshake.headers['x-user-payload'] as string;
     
-    if (!token) {
-      console.log('No token provided in handshake');
-      return next(new Error('Authentication error: No token provided'));
-    }
-
-    // Extract token from "Bearer <token>" format
-    const bearerToken = token.replace('Bearer ', '').trim();
-
-    // Verify token with auth service
-    const response = await fetch(`http://auth-service:5000/api/v1/auth/verify-user`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${bearerToken}`,
-      },
-    });
-
-    if (!response.ok) {
-      console.log('Auth service returned non-OK status:', response.status);
-      return next(new Error('Authentication error: Invalid token'));
-    }
-
-    // Get user payload from response header
-    const userPayloadHeader = response.headers.get('x-user-payload');
     if (!userPayloadHeader) {
-      console.log('No user payload in response header');
+      console.log('No user payload in headers - request must come through nginx');
       return next(new Error('Authentication error: No user data'));
     }
 
     const userPayload = JSON.parse(userPayloadHeader);
 
-    // Attach user data to socket (auth service returns 'id', not 'userId')
+    // Attach user data to socket
     socket.data.userId = userPayload.id || userPayload.userId;
     socket.data.username = userPayload.username;
 
@@ -87,6 +65,9 @@ io.use(async (socket, next) => {
 app.use(cors());
 app.use(express.json());
 
+// Import routes
+import chatRoutes from './routes/chatRoutes.js';
+
 // Health check endpoint
 app.get('/health', (req: Request, res: Response) => {
   res.json({ 
@@ -97,87 +78,8 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
-// REST API endpoint to get room history
-app.get('/api/chat/:roomId/history', async (req: Request, res: Response) => {
-  try {
-    const { roomId } = req.params;
-    const limit = parseInt(req.query.limit as string) || 50;
-    
-    const messages = await redisClient.lrange(`chat:history:${roomId}`, 0, limit - 1);
-    const history = messages.map((msg) => JSON.parse(msg)).reverse();
-    
-    res.json({ success: true, messages: history });
-  } catch (error) {
-    console.error('Error fetching history:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch history' });
-  }
-});
-
-// REST API endpoint to send message (for Postman testing)
-app.post('/api/chat/:roomId/message', async (req: Request, res: Response) => {
-  try {
-    const { roomId } = req.params;
-    const { message, userId, username } = req.body;
-    
-    if (!message || !userId || !username) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Missing required fields: message, userId, username' 
-      });
-    }
-    
-    const messageData = {
-      roomId,
-      userId,
-      username,
-      message,
-      timestamp: Date.now(),
-    };
-    
-    // Save to Redis
-    await redisClient.lpush(`chat:history:${roomId}`, JSON.stringify(messageData));
-    await redisClient.ltrim(`chat:history:${roomId}`, 0, 99);
-    
-    // Emit to all connected clients in the room
-    io.to(roomId).emit('message', messageData);
-    
-    res.json({ success: true, message: 'Message sent', data: messageData });
-  } catch (error) {
-    console.error('Error sending message:', error);
-    res.status(500).json({ success: false, error: 'Failed to send message' });
-  }
-});
-
-// REST API endpoint to get room users
-app.get('/api/chat/:roomId/users', async (req: Request, res: Response) => {
-  try {
-    const { roomId } = req.params;
-    const userIds = await redisClient.smembers(`room:${roomId}:users`);
-    
-    res.json({ success: true, roomId, userCount: userIds.length, users: userIds });
-  } catch (error) {
-    console.error('Error fetching room users:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch users' });
-  }
-});
-
-// REST API endpoint to get Socket.IO connection info
-app.get('/api/socket-info', (req: Request, res: Response) => {
-  const sockets = io.sockets.sockets;
-  const connections = Array.from(sockets.values()).map(socket => ({
-    id: socket.id,
-    userId: socket.data.userId,
-    username: socket.data.username,
-    rooms: Array.from(socket.rooms).filter(room => room !== socket.id),
-    connected: socket.connected,
-  }));
-  
-  res.json({ 
-    success: true, 
-    totalConnections: sockets.size,
-    connections 
-  });
-});
+// Use chat routes
+app.use('/api/chat', chatRoutes);
 
 // Add connection error handling
 io.engine.on('connection_error', (err) => {
