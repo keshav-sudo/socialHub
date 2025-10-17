@@ -4,6 +4,22 @@ A production-ready, horizontally scalable social media backend built with micros
 
 ---
 
+## 🎓 **New! Learning Resources for Students**
+
+**Are you a student learning microservices?** Start here:
+
+📚 **[HOW_TO_LEARN_THIS_PROJECT.md](./HOW_TO_LEARN_THIS_PROJECT.md)** - Your starting point! Read this first to understand the learning path.
+
+📖 **[LEARNING_GUIDE.md](./LEARNING_GUIDE.md)** - Comprehensive guide covering architecture, patterns, and step-by-step learning plan.
+
+🏗️ **[Feed Service Implementation Guide](./services/feed-service/README.md)** - Build a production-ready feed service from scratch with complete code examples.
+
+✅ **[Implementation Checklist](./services/feed-service/IMPLEMENTATION_CHECKLIST.md)** - Track your progress as you implement the Feed Service.
+
+**Perfect for:** 5th semester students, self-learners, anyone wanting to understand microservices the "100% good way"!
+
+---
+
 ## 📖 Table of Contents
 1. [High-Level Architecture](#-high-level-architecture)
 2. [Complete System Flow](#-complete-system-flow)
