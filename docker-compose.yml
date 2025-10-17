@@ -13,6 +13,7 @@ services:
       - notification-service
       - users-service
       - chat-service
+      - feed-service
 
   auth-service:
     build: ./services/auth-service
@@ -67,6 +68,18 @@ services:
       - ./services/chat-service/.env
     depends_on:
       - redis
+    networks:
+      - socialhub-network
+
+  feed-service:
+    build: ./services/feed-service
+    ports:
+      - "5005:5005"
+    env_file:
+      - ./services/feed-service/.env
+    depends_on:
+      - redis
+      - kafka
     networks:
       - socialhub-network
       
