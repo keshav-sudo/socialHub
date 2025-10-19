@@ -9,7 +9,6 @@ import { connectProducer } from "./utils/Kafka.js";
 const app = express();
 const PORT = dotenvVars.PORT;
 
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
@@ -19,7 +18,7 @@ app.use('/api/v1/users/' , allRoutes);
 
 connectProducer();
 
-const server:http.Server = app.listen( PORT , ()=> {
+const server:http.Server = app.listen( PORT , '0.0.0.0', ()=> {
      console.log(`Server is running on http://localhost:${PORT}`);
 })
 

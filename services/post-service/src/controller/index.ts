@@ -1,5 +1,6 @@
 import  {createPost } from "./post/createPost.js";
 import { getAllPosts } from "./post/getAllPost.js";
+import { getUserPosts } from "./post/getUserPosts.js";
 import { test } from "./post/test.js";
 import {getPost} from "./post/getPost.js"
 import { UpdatePost } from "./post/updatePost.js";
@@ -14,6 +15,7 @@ import {createLike} from "./like/likeCreate.js"
 export default {
     createPost,
     getAllPosts,
+    getUserPosts,
     test,
     UpdatePost,
     deletePost,

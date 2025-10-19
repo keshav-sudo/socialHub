@@ -8,7 +8,6 @@ import authRoutes from "./routes/user.route.js"
 const app = express();
 const PORT = 5000;
 
-
 app.use(express.json());
 app.use("/api/v1/auth" , authRoutes);
 
@@ -18,7 +17,7 @@ app.get('/' , (res : Response) => {
 
 
 
-const server:http.Server = app.listen( PORT , ()=> {
+const server:http.Server = app.listen( PORT , '0.0.0.0', ()=> {
      console.log(`Server is running on http://localhost:${PORT}`);
 })
 

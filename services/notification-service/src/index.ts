@@ -14,7 +14,7 @@ const TARGET_TOPIC = dotenvVar.TOPICS;
 
 const startServerAndConsumer = async() => {
     await startNotificationConsumer();
-    app.listen(dotenvVar.PORT, () => {
+    app.listen(dotenvVar.PORT, '0.0.0.0', () => {
     console.log(`App is starting on Port ${dotenvVar.PORT}`);
     console.log(`👂 Kafka Consumer is listening on topic: ${TARGET_TOPIC}`);
 });

@@ -7,6 +7,7 @@ const router = express.Router();
 router.get("/test" , controller.test);
 router.post("/" , upload.array('file', 10) , controller.createPost);
 router.get ("/getall" ,  controller.getAllPosts);
+router.get ("/user/:userId" ,  controller.getUserPosts);
 router.get ("/:id" ,  controller.getPost);
 router.patch("/:id" , controller.UpdatePost);
 router.delete("/:id" , controller.deletePost);

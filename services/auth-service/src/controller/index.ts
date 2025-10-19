@@ -3,6 +3,7 @@ import { signupController } from "./signup.js";
 import {verifyUser} from "./verifyUser.js"
 import { resetPassword , requestPassReset, verifyPassResetOtp} from "./resetPassWord.js";
 import { checkUsernameAvailability } from "./check.js";
+import { searchUsers, getUserProfile, updateUserProfile } from "./searchUsers.js";
 export {
     loginController,
     signupController,
@@ -10,5 +11,8 @@ export {
     requestPassReset,
     verifyPassResetOtp,
     verifyUser,
-    checkUsernameAvailability
+    checkUsernameAvailability,
+    searchUsers,
+    getUserProfile,
+    updateUserProfile
 };
