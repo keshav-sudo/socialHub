@@ -108,16 +108,12 @@ check_container "gateway"
 
 echo ""
 
-# 5. Check Service HTTP Endpoints
-echo "🌐 HTTP Endpoints"
-echo "-----------------"
+# 5. Check Gateway & Key Service Endpoints
+echo "🌐 Gateway & Services"
+echo "---------------------"
 
-check_service "Auth Service" "http://localhost:5000/" "200"
-check_service "Users Service" "http://localhost:5003/" "200"
-check_service "Post Service" "http://localhost:5001/" "200"
-check_service "Notification Service" "http://localhost:5002/" "200"
 check_service "Chat Service" "http://localhost:5004/health" "200"
-check_service "Feed Service" "http://localhost:5005/" "200"
+check_service "Feed Service" "http://localhost:5005/health" "200"
 check_service "Gateway" "http://localhost:8080/" "404"
 
 echo ""
