@@ -8,8 +8,10 @@ import {
     verifyPassResetOtp,
     resetPassword,
     verifyUser,
-    checkUsernameAvailability
-    
+    checkUsernameAvailability,
+    searchUsers,
+    getUserProfile,
+    updateUserProfile
 } from "../controller/index.js"
 
 
@@ -22,5 +24,10 @@ router.post("/reset-password", resetPassword);
 
 router.get("/verify-user" ,verifyUser )
 router.post("/check/:username" , checkUsernameAvailability)
+
+// User profile and search routes
+router.get("/search", searchUsers);
+router.get("/profile/:userId", getUserProfile);
+router.patch("/profile", updateUserProfile);
 
 export default router;

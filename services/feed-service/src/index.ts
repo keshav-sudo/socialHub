@@ -11,7 +11,6 @@ const app = express();
 const PORT = process.env.PORT || 5005;
 
 // Middleware
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
 
 // Routes
@@ -39,7 +38,7 @@ async function startServer() {
     console.log('✅ Kafka consumer started');
 
     // Start Express server
-    app.listen(PORT, () => {
+    app.listen(Number(PORT), '0.0.0.0', () => {
       console.log(`🚀 Feed Service running on port ${PORT}`);
     });
   } catch (error) {

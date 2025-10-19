@@ -19,7 +19,7 @@ const httpServer = createServer(app);
 // Configure Socket.IO with CORS
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -62,7 +62,6 @@ io.use(async (socket, next) => {
 });
 
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // Import routes
@@ -91,7 +90,7 @@ setupSocketHandlers(io);
 
 const PORT = process.env.PORT || 5004;
 
-httpServer.listen(PORT, () => {
+httpServer.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Chat service running on port ${PORT}`);
   console.log(`WebSocket server ready`);
 });

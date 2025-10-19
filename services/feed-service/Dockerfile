@@ -13,7 +13,6 @@ RUN npm install \
 
 COPY . .
 
-RUN npx prisma generate
 
 RUN npm run build
 
@@ -25,9 +24,8 @@ WORKDIR /app
 
 COPY --from=builder /builds/dist ./dist
 COPY --from=builder /builds/node_modules ./node_modules
-COPY --from=builder /builds/prisma ./prisma
 COPY --from=builder /builds/package.json ./package.json
-COPY --from=builder /builds/generated ./generated
+
 
 
 CMD ["npm"  , "start"]
