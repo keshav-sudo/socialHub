@@ -2,6 +2,10 @@
 
 A production-ready, horizontally scalable social media backend built with microservices architecture, event-driven design, and modern DevOps practices.
 
+> **📘 NEW TO THE PROJECT?** Start with [PROJECT_SUMMARY.md](./PROJECT_SUMMARY.md) for a quick overview!
+> 
+> **🔄 WANT TO UNDERSTAND THE CODE?** Read [CODE_FLOW.md](./docs/CODE_FLOW.md) for detailed explanations!
+
 ---
 
 ## 📖 Table of Contents
@@ -502,8 +506,34 @@ redisSubscriber.on('message', (channel, message) => {
 
 ## 🚀 Quick Start Guide
 
+**📘 For detailed setup instructions, see [SETUP_GUIDE.md](./docs/SETUP_GUIDE.md)**
+
+### **TL;DR - Fast Start**
+
+```bash
+# 1. Clone and enter directory
+git clone <repository-url>
+cd socialHub
+
+# 2. Create environment files (see docs/SETUP_GUIDE.md for details)
+# Copy and configure .env for each service
+
+# 3. Start infrastructure
+docker compose up -d redis kafka
+
+# 4. Wait for Kafka (important!)
+sleep 30
+
+# 5. Start all services
+docker compose up -d
+
+# 6. Verify setup
+chmod +x scripts/verify-setup.sh
+./scripts/verify-setup.sh
+```
+
 ### **Prerequisites**
-- Docker & Docker Compose (v20.10+)
+- Docker & Docker Compose (v20.10+) or Docker with Compose plugin
 - Node.js 18+ (for local development)
 - Git
 
@@ -515,82 +545,182 @@ cd socialHub
 
 ### **2. Environment Setup**
 
-Create `.env` files for each service (or use provided `.env.example`):
+Each service needs environment variables. Create `.env` files:
 
 ```bash
-# Copy example env files
-cp services/auth-service/.env.example services/auth-service/.env
-cp services/users-service/.env.example services/users-service/.env
-cp services/post-service/.env.example services/post-service/.env
-cp services/notification-service/.env.example services/notification-service/.env
-cp services/chat-service/.env.example services/chat-service/.env
+# Auth Service
+cat > services/auth-service/.env << EOF
+PORT=5000
+DATABASE_URL="postgresql://postgres:password@localhost:5432/auth_db"
+JWT_SECRET="your-super-secret-jwt-key-change-in-production"
+REDIS_URL="redis://localhost:6379"
+NODE_ENV="development"
+EOF
+
+# Users Service
+cat > services/users-service/.env << EOF
+PORT=5003
+DATABASE_URL="postgresql://postgres:password@localhost:5432/users_db"
+KAFKA_BROKERS="localhost:9092"
+NODE_ENV="development"
+EOF
+
+# Post Service
+cat > services/post-service/.env << EOF
+PORT=5001
+DATABASE_URL="postgresql://postgres:password@localhost:5432/posts_db"
+KAFKA_BROKERS="localhost:9092"
+CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+GEMINI_API_KEY="your-gemini-api-key"
+NODE_ENV="development"
+EOF
+
+# Notification Service
+cat > services/notification-service/.env << EOF
+PORT=5002
+MONGODB_URL="mongodb://localhost:27017/notifications"
+KAFKA_BROKERS="localhost:9092"
+NODE_ENV="development"
+EOF
+
+# Chat Service
+cat > services/chat-service/.env << EOF
+PORT=5004
+REDIS_URL="redis://localhost:6379"
+NODE_ENV="development"
+EOF
+
+# Feed Service
+cat > services/feed-service/.env << EOF
+PORT=5005
+REDIS_URL="redis://localhost:6379"
+KAFKA_BROKERS="localhost:9092"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/posts_db"
+NODE_ENV="development"
+EOF
 ```
+
+**Note:** Update Cloudinary and Gemini API keys with your actual credentials.
 
 ### **3. Start Infrastructure**
 
 Start databases and message queues:
 ```bash
-docker-compose up -d postgres mongodb redis kafka zookeeper
+# Using docker compose (newer versions)
+docker compose up -d redis kafka
+
+# Or using docker-compose (older versions)
+docker-compose up -d redis kafka
 ```
 
 Wait for services to be ready (~30 seconds):
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
-### **4. Run Database Migrations**
+### **4. Verify Infrastructure**
+
+```bash
+# Check Redis
+docker compose exec redis redis-cli ping
+# Expected: PONG
+
+# Check Kafka
+docker compose logs kafka | tail -20
+# Should see "Kafka Server started"
+```
+
+### **5. Install Dependencies & Build Services**
 
 ```bash
 # Auth Service
 cd services/auth-service
-npx prisma migrate dev
+npm install
 npx prisma generate
+npm run build
 
 # Users Service
 cd ../users-service
-npx prisma migrate dev
+npm install
 npx prisma generate
+npm run build
 
 # Post Service
 cd ../post-service
-npx prisma migrate dev
+npm install
 npx prisma generate
+npm run build
 
 # Notification Service
 cd ../notification-service
+npm install
 npx prisma generate
+npm run build
+
+# Chat Service
+cd ../chat-service
+npm install
+npm run build
+
+# Feed Service
+cd ../feed-service
+npm install
+npm run build
+
+# Return to root
+cd ../..
 ```
 
-### **5. Start All Services**
+### **6. Start All Services**
 
 ```bash
-# Return to root directory
-cd ../..
-
 # Start all services
-docker-compose up -d
+docker compose up -d
+
+# Check status
+docker compose ps
 
 # Check logs
-docker-compose logs -f
+docker compose logs -f
 ```
 
-### **6. Verify Services**
+### **7. Verify Services**
 
 ```bash
-# Health checks
-curl http://localhost/health                    # Gateway
-curl http://localhost:5000/health              # Auth Service
-curl http://localhost:5003/health              # Users Service
-curl http://localhost:5001/health              # Post Service
-curl http://localhost:5002/health              # Notification Service
-curl http://localhost:5004/health              # Chat Service
+# Test each service
+echo "Testing Auth Service..."
+curl -s http://localhost:5000/ || echo "Auth Service not responding"
+
+echo "Testing Users Service..."
+curl -s http://localhost:5003/ || echo "Users Service not responding"
+
+echo "Testing Post Service..."
+curl -s http://localhost:5001/ || echo "Post Service not responding"
+
+echo "Testing Notification Service..."
+curl -s http://localhost:5002/ || echo "Notification Service not responding"
+
+echo "Testing Chat Service..."
+curl -s http://localhost:5004/health || echo "Chat Service not responding"
+
+echo "Testing Feed Service..."
+curl -s http://localhost:5005/ || echo "Feed Service not responding"
+
+echo "Testing Gateway..."
+curl -s http://localhost:8080/ || echo "Gateway not responding"
 ```
 
-### **7. Test the System**
+### **8. Test the System**
 
-#### A. Register a User
+**For complete API testing guide, see [API_TESTING.md](./API_TESTING.md)**
+
+#### Quick Test - Authentication Flow
+
 ```bash
-curl -X POST http://localhost/auth/signup \
+# 1. Register a new user
+curl -X POST http://localhost:8080/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -598,63 +728,121 @@ curl -X POST http://localhost/auth/signup \
     "username": "johndoe",
     "password": "SecurePass123!"
   }'
-```
 
-#### B. Login
-```bash
-TOKEN=$(curl -X POST http://localhost/auth/login \
+# Expected response:
+# {
+#   "message": "User created successfully",
+#   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+# }
+
+# 2. Login
+curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "identifier": "john@example.com",
     "password": "SecurePass123!"
-  }' | jq -r '.token')
+  }'
 
-echo "Token: $TOKEN"
-```
+# Save token for next requests
+TOKEN="paste-your-token-here"
 
-#### C. Create a Post
-```bash
-curl -X POST http://localhost/posts/ \
+# 3. Test protected endpoint - Create a post
+curl -X POST http://localhost:8080/posts/ \
   -H "Authorization: Bearer $TOKEN" \
-  -F "content=My first post on SocialHub!" \
-  -F "visibility=public"
-```
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "My first post on SocialHub!",
+    "visibility": "public"
+  }'
 
-#### D. Follow a User
-```bash
-# First, create another user and get their ID
-# Then follow them
-curl -X POST http://localhost/users/follow/USER_ID \
+# 4. Get your notifications
+curl -X GET http://localhost:8080/notify/notifications \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-#### E. Get Notifications
-```bash
-curl -X GET http://localhost/notify/notifications \
-  -H "Authorization: Bearer $TOKEN"
-```
+#### Test WebSocket Chat
 
-#### F. Test Chat (WebSocket)
-
-Using a WebSocket client (like Postman or wscat):
 ```bash
-# Install wscat
+# Install wscat if not already installed
 npm install -g wscat
 
-# Connect to chat service
-wscat -c "ws://localhost:5004" \
-  -H "Authorization: Bearer $TOKEN"
+# Connect to chat service (replace TOKEN with your actual token)
+wscat -c "ws://localhost:8080/socket.io/?EIO=4&transport=websocket" \
+  -H "Authorization: Bearer TOKEN"
 
-# Send events (as JSON):
-> {"event":"join_room","data":{"roomId":"room-123"}}
-> {"event":"send_message","data":{"roomId":"room-123","message":"Hello!"}}
+# Once connected, send these events:
+# Join a room
+42["join_room",{"roomId":"room-123"}]
+
+# Send a message
+42["send_message",{"roomId":"room-123","message":"Hello World!"}]
+
+# You should receive:
+# - message_history event with past messages
+# - new_message event with your sent message
 ```
 
 ---
 
-## 📖 Service Documentation
+## ✅ Verification Checklist
 
-### **Detailed Service READMEs**
+### **Automated Verification**
+
+We provide a script to verify your setup:
+
+```bash
+chmod +x scripts/verify-setup.sh
+./scripts/verify-setup.sh
+```
+
+This script checks:
+- ✓ Docker containers are running
+- ✓ Redis connectivity
+- ✓ Kafka broker status
+- ✓ All microservices are up
+- ✓ HTTP endpoints respond
+- ✓ Authentication flow works
+- ✓ JWT validation works
+
+### **Manual Verification**
+
+After setup, verify everything is working:
+
+- [ ] All Docker containers are running: `docker compose ps`
+- [ ] Redis responds: `docker compose exec redis redis-cli ping`
+- [ ] Kafka is ready: `docker compose logs kafka | grep "started"`
+- [ ] Can register user: `curl -X POST http://localhost:8080/auth/signup ...`
+- [ ] Can login: `curl -X POST http://localhost:8080/auth/login ...`
+- [ ] Can create post with auth: `curl -H "Authorization: Bearer ..." http://localhost:8080/posts/`
+- [ ] Notifications work: Check notifications after creating post
+- [ ] WebSocket connects: Use wscat to connect to chat
+
+---
+
+## 📖 Documentation
+
+### **Core Documentation**
+
+- 🔄 **[Complete Code Flow](./docs/CODE_FLOW.md)** - **START HERE!**
+  - End-to-end request flows
+  - Service-by-service detailed flows
+  - Event-driven patterns (Kafka)
+  - WebSocket real-time communication
+  - Database interactions
+  - Testing guide
+  - Troubleshooting
+
+- 🧪 **[API Testing Guide](./docs/API_TESTING.md)**
+  - All endpoints with examples
+  - cURL commands
+  - Expected responses
+
+- 📘 **[Setup Guide](./docs/SETUP_GUIDE.md)**
+  - Detailed installation instructions
+  - Environment configuration
+  - Development and production setup
+
+### **Service Documentation**
 
 Each service has comprehensive documentation with code flow explanations:
 
@@ -698,6 +886,11 @@ Each service has comprehensive documentation with code flow explanations:
   - JWT validation flow
   - Load balancing strategies
   - Rate limiting setup
+
+- 📊 **[Feed Service](./services/feed-service/README.md)**
+  - Personalized feed generation
+  - Caching strategies
+  - Event consumption
 
 ---
 
@@ -888,54 +1081,271 @@ services/
 
 ## 🐛 Troubleshooting
 
+### **Quick Diagnosis**
+
+Run the verification script to identify issues:
+```bash
+./verify-setup.sh
+```
+
 ### **Common Issues**
 
-#### Services Not Starting
-```bash
-# Check Docker logs
-docker-compose logs -f SERVICE_NAME
+#### 1. Services Not Starting
 
-# Check if ports are available
-lsof -i :5000  # Auth Service port
-lsof -i :5432  # PostgreSQL port
+**Symptoms:** `docker compose ps` shows services as "Exit" or not running
+
+**Solutions:**
+```bash
+# Check logs for specific service
+docker compose logs SERVICE_NAME
+
+# Common issues:
+# - Port already in use: Change port in .env file
+# - Missing dependencies: Ensure all .env files exist
+# - Build errors: Rebuild with --no-cache
+
+# Restart specific service
+docker compose restart SERVICE_NAME
+
+# Rebuild and restart
+docker compose up -d --build SERVICE_NAME
 ```
 
-#### Database Connection Errors
+#### 2. Database Connection Errors
+
+**Symptoms:** "Connection refused" or "Can't reach database" in logs
+
+**Solutions:**
 ```bash
-# Verify PostgreSQL is running
-docker-compose ps postgres
+# For PostgreSQL services (Auth, Users, Posts)
+# Update DATABASE_URL in .env to use correct host
 
-# Check connection
-docker exec -it socialhub_postgres psql -U postgres -c "SELECT 1"
+# When running in Docker:
+DATABASE_URL="postgresql://postgres:password@host.docker.internal:5432/db_name"
 
-# Reset database
-docker-compose down -v  # ⚠️ Deletes all data
-docker-compose up -d postgres
-npx prisma migrate reset
+# When running locally:
+DATABASE_URL="postgresql://postgres:password@localhost:5432/db_name"
+
+# Test PostgreSQL connection
+docker compose exec SERVICE_NAME npx prisma db push
 ```
 
-#### Kafka Connection Issues
+#### 3. Kafka Connection Issues
+
+**Symptoms:** Services can't connect to Kafka, "Broker not available"
+
+**Solutions:**
 ```bash
-# Check Kafka broker
-docker-compose logs kafka
+# Check Kafka is running
+docker compose ps kafka
 
-# List topics
-docker exec -it socialhub_kafka kafka-topics --list --bootstrap-server localhost:9092
+# Check Kafka logs
+docker compose logs kafka | tail -50
 
-# Consumer lag
-docker exec -it socialhub_kafka kafka-consumer-groups \
-  --bootstrap-server localhost:9092 --describe --group notification-group
+# Ensure Kafka is ready (wait 30 seconds after start)
+sleep 30
+
+# Verify Kafka broker
+docker compose exec kafka kafka-broker-api-versions \
+  --bootstrap-server localhost:9092
+
+# If still failing, restart Kafka
+docker compose restart kafka
 ```
 
-#### Redis Connection Issues
+#### 4. Redis Connection Issues
+
+**Symptoms:** "Redis connection refused" in Chat/Auth service logs
+
+**Solutions:**
 ```bash
 # Test Redis connection
-docker exec -it socialhub_redis redis-cli PING
-# Should return: PONG
+docker compose exec redis redis-cli ping
+# Expected: PONG
 
-# Check keys
-docker exec -it socialhub_redis redis-cli KEYS "*"
+# Check Redis logs
+docker compose logs redis
+
+# Update REDIS_URL in .env files:
+# For Docker: REDIS_URL="redis://redis:6379"
+# For local: REDIS_URL="redis://localhost:6379"
+
+# Restart Redis
+docker compose restart redis
 ```
+
+#### 5. 502 Bad Gateway (Nginx)
+
+**Symptoms:** `curl http://localhost:8080/` returns 502
+
+**Solutions:**
+```bash
+# Check if target service is running
+docker compose ps
+
+# Check Nginx logs
+docker compose logs gateway
+
+# Verify nginx.conf upstream addresses match service names
+# Should be: server SERVICE_NAME:PORT (e.g., auth-service:5000)
+
+# Restart gateway
+docker compose restart gateway
+```
+
+#### 6. JWT Validation Fails (401 Unauthorized)
+
+**Symptoms:** All protected endpoints return 401
+
+**Solutions:**
+```bash
+# 1. Verify JWT_SECRET is the same in Auth Service
+grep JWT_SECRET services/auth-service/.env
+
+# 2. Check token is being sent correctly
+# Header: Authorization: Bearer <token>
+
+# 3. Test auth endpoint directly
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"identifier": "user@example.com", "password": "password"}'
+
+# 4. Verify Nginx auth_request works
+docker compose logs gateway | grep "auth/verify"
+
+# 5. Check Auth Service logs
+docker compose logs auth-service | grep "verify"
+```
+
+#### 7. WebSocket Connection Drops
+
+**Symptoms:** Chat disconnects immediately or won't connect
+
+**Solutions:**
+```bash
+# 1. Check Chat Service is running
+docker compose ps chat-service
+
+# 2. Verify WebSocket headers in nginx.conf
+# Must have:
+#   proxy_http_version 1.1;
+#   proxy_set_header Upgrade $http_upgrade;
+#   proxy_set_header Connection "upgrade";
+
+# 3. Check JWT is in handshake
+# wscat -c "ws://localhost:8080/socket.io/..." -H "Authorization: Bearer TOKEN"
+
+# 4. Check Chat Service logs
+docker compose logs chat-service
+
+# 5. Test direct connection (bypassing Nginx)
+wscat -c "ws://localhost:5004"
+```
+
+#### 8. CORS Errors
+
+**Symptoms:** Browser console shows CORS errors
+
+**Solutions:**
+```bash
+# Update nginx.conf for your frontend URL
+# Replace: http://localhost:5173
+# With: your-frontend-url
+
+# Nginx CORS headers needed:
+add_header 'Access-Control-Allow-Origin' 'YOUR_FRONTEND_URL' always;
+add_header 'Access-Control-Allow-Credentials' 'true' always;
+add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, PATCH, OPTIONS' always;
+add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type' always;
+
+# Restart gateway
+docker compose restart gateway
+```
+
+#### 9. File Upload Fails
+
+**Symptoms:** Post creation with images fails
+
+**Solutions:**
+```bash
+# 1. Check Cloudinary credentials in Post Service .env
+grep CLOUDINARY services/post-service/.env
+
+# 2. Verify file size limits in nginx.conf
+# client_max_body_size 10M;
+
+# 3. Check Post Service logs
+docker compose logs post-service
+
+# 4. Test with small file first (< 1MB)
+```
+
+#### 10. Notifications Not Working
+
+**Symptoms:** No notifications appear after actions
+
+**Solutions:**
+```bash
+# 1. Check Notification Service is consuming Kafka
+docker compose logs notification-service | grep "Kafka"
+
+# 2. Verify Kafka topics exist
+docker compose exec kafka kafka-topics \
+  --list --bootstrap-server localhost:9092
+
+# Should see: POST_TOPIC, USER_TOPIC
+
+# 3. Check for Kafka consumer errors
+docker compose logs notification-service | grep "error"
+
+# 4. Verify MongoDB connection
+docker compose logs notification-service | grep "MongoDB"
+
+# 5. Test notification endpoint
+curl -H "Authorization: Bearer TOKEN" \
+  http://localhost:8080/notify/notifications
+```
+
+### **Nuclear Options**
+
+If nothing works, try these in order:
+
+```bash
+# 1. Restart all services
+docker compose restart
+
+# 2. Rebuild all services
+docker compose up -d --build
+
+# 3. Remove and recreate (⚠️ DELETES DATA)
+docker compose down
+docker compose up -d
+
+# 4. Full reset with volume cleanup (⚠️ DELETES ALL DATA)
+docker compose down -v
+docker compose up -d
+
+# 5. Check for port conflicts
+lsof -i :8080  # Nginx
+lsof -i :5000  # Auth
+lsof -i :5001  # Post
+lsof -i :5002  # Notification
+lsof -i :5003  # Users
+lsof -i :5004  # Chat
+lsof -i :5005  # Feed
+lsof -i :9092  # Kafka
+lsof -i :6379  # Redis
+```
+
+### **Getting Help**
+
+If you're still stuck:
+
+1. Run the verification script: `./verify-setup.sh`
+2. Collect logs: `docker compose logs > logs.txt`
+3. Check environment files: `cat services/*/. env`
+4. Review CODE_FLOW.md for architecture understanding
+5. Check individual service READMEs for service-specific issues
 
 ---
 
@@ -1056,10 +1466,85 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📚 Additional Resources
 
-- **Architecture Diagrams:** See `/docs/architecture/`
-- **API Documentation:** See `/docs/api/`
-- **Deployment Guide:** See `/docs/deployment/`
-- **Contributing Guide:** See `CONTRIBUTING.md`
+- **[Project Summary](./PROJECT_SUMMARY.md)** - Quick overview and learning path
+- **[Code Flow](./docs/CODE_FLOW.md)** - Detailed explanation of how everything works ⭐
+- **[Setup Guide](./docs/SETUP_GUIDE.md)** - Step-by-step installation
+- **[API Testing](./docs/API_TESTING.md)** - Test all endpoints
+- **[Verification Script](./scripts/verify-setup.sh)** - Automated setup checker
+
+### **Service Documentation**
+- [Auth Service](./services/auth-service/README.md)
+- [Users Service](./services/users-service/README.md)
+- [Post Service](./services/post-service/README.md)
+- [Notification Service](./services/notification-service/README.md)
+- [Chat Service](./services/chat-service/README.md)
+- [Feed Service](./services/feed-service/README.md)
+- [Gateway](./gateway/README.md)
+
+---
+
+## 🎯 Quick Reference Card
+
+### Essential Commands
+
+```bash
+# Start everything
+docker compose up -d
+
+# Stop everything
+docker compose down
+
+# View logs
+docker compose logs -f SERVICE_NAME
+
+# Restart service
+docker compose restart SERVICE_NAME
+
+# Rebuild service
+docker compose up -d --build SERVICE_NAME
+
+# Verify setup
+./verify-setup.sh
+```
+
+### Essential Endpoints
+
+```bash
+# Auth
+POST /auth/signup       # Register
+POST /auth/login        # Login
+GET  /auth/verify-user  # Validate token (internal)
+
+# Posts
+POST /posts/           # Create post
+GET  /posts/:id        # Get post
+POST /posts/:id/like   # Like/unlike
+
+# Users
+POST /users/follow/:id    # Follow user
+GET  /users/profile/:id   # Get profile
+GET  /users/followers     # Get followers
+
+# Notifications
+GET  /notify/notifications  # Get notifications
+
+# Chat
+WS   /socket.io/          # WebSocket connection
+```
+
+### Service Ports
+
+```
+Gateway:      8080
+Auth:         5000
+Post:         5001
+Notification: 5002
+Users:        5003
+Chat:         5004
+Feed:         5005
+Redis:        6379
+Kafka:        9092
+```
 
 ---
 
