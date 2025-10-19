@@ -11,7 +11,6 @@ export const startKafkaConsumer = async () => {
     await consumer.connect();
     console.log('✅ Kafka Consumer connected');
 
-    // Subscribe to all relevant topics
     await consumer.subscribe({ topics: ['POST_TOPIC', 'LIKE_TOPIC', 'COMMENT_TOPIC'], fromBeginning: false });
     console.log('✅ Subscribed to topics: POST_TOPIC, LIKE_TOPIC, COMMENT_TOPIC');
 
@@ -48,7 +47,6 @@ export const startKafkaConsumer = async () => {
   }
 };
 
-// Handle POST events
 async function handlePostEvent(event: any, feedService: FeedService) {
   const { eventType, data } = event;
 
@@ -62,13 +60,11 @@ async function handlePostEvent(event: any, feedService: FeedService) {
   }
 }
 
-// Handle LIKE events
 async function handleLikeEvent(event: any, feedService: FeedService) {
   const { eventType, data } = event;
 
   switch (eventType) {
     case 'like.created':
-      // Update engagement score for the post
       await feedService.updatePostEngagement(data.postId, 'like');
       console.log(`✅ Like engagement updated for post ${data.postId}`);
       break;
@@ -77,13 +73,11 @@ async function handleLikeEvent(event: any, feedService: FeedService) {
   }
 }
 
-// Handle COMMENT events
 async function handleCommentEvent(event: any, feedService: FeedService) {
   const { eventType, data } = event;
 
   switch (eventType) {
     case 'comment.created':
-      // Update engagement score for the post
       await feedService.updatePostEngagement(data.postId, 'comment');
       console.log(`✅ Comment engagement updated for post ${data.postId}`);
       break;
@@ -92,7 +86,6 @@ async function handleCommentEvent(event: any, feedService: FeedService) {
   }
 }
 
-// Graceful shutdown
 export const stopKafkaConsumer = async () => {
   await consumer.disconnect();
   console.log('✅ Kafka Consumer disconnected');

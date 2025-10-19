@@ -11,12 +11,6 @@ export class FeedController {
     this.regenerationService = new FeedRegenerationService();
   }
 
-  /**
-   * Get user feed with pagination
-   * GET /api/feed/:userId?page=1&limit=20
-   * 
-   * Auto-regenerates feed if cache is empty (lazy loading)
-   */
   async getFeed(req: Request, res: Response) {
     try {
       const { userId } = req.params;
@@ -45,11 +39,6 @@ export class FeedController {
     }
   }
 
-  /**
-   * Manually regenerate user feed
-   * POST /api/feed/regenerate/:userId
-   * Body: { followingIds: [] }
-   */
   async regenerateFeed(req: Request, res: Response) {
     try {
       const { userId } = req.params;
@@ -85,11 +74,6 @@ export class FeedController {
     }
   }
 
-  /**
-   * Batch regenerate feeds for multiple users
-   * POST /api/feed/batch-regenerate
-   * Body: { userIds: [] }
-   */
   async batchRegenerateFeed(req: Request, res: Response) {
     try {
       const { userIds } = req.body;
@@ -101,7 +85,6 @@ export class FeedController {
         });
       }
 
-      // Run in background
       this.regenerationService.batchRegenerateFeeds(userIds).catch(err => {
         console.error('Batch regeneration error:', err);
       });
@@ -119,10 +102,6 @@ export class FeedController {
     }
   }
 
-  /**
-   * Invalidate user feed cache
-   * DELETE /api/feed/:userId
-   */
   async invalidateFeed(req: Request, res: Response) {
     try {
       const { userId } = req.params;
@@ -149,11 +128,6 @@ export class FeedController {
     }
   }
 
-  /**
-   * Manually add post to follower feeds
-   * POST /api/feed/post
-   * Body: { authorId, postId, username }
-   */
   async addPostToFeeds(req: Request, res: Response) {
     try {
       const { authorId, postId, username } = req.body;
@@ -180,11 +154,6 @@ export class FeedController {
     }
   }
 
-  /**
-   * Cache followers for a user
-   * POST /api/feed/cache-followers
-   * Body: { userId, followerIds: [] }
-   */
   async cacheFollowers(req: Request, res: Response) {
     try {
       const { userId, followerIds } = req.body;
@@ -211,11 +180,6 @@ export class FeedController {
     }
   }
 
-  /**
-   * Cache following list for a user
-   * POST /api/feed/cache-following
-   * Body: { userId, followingIds: [] }
-   */
   async cacheFollowing(req: Request, res: Response) {
     try {
       const { userId, followingIds } = req.body;
@@ -242,9 +206,6 @@ export class FeedController {
     }
   }
 
-  /**
-   * Health check endpoint
-   */
   async health(req: Request, res: Response) {
     res.json({
       success: true,

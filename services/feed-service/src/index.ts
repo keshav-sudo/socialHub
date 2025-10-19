@@ -10,13 +10,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5005;
 
-// Middleware
 app.use(express.json());
 
-// Routes
 app.use('/api/feed', feedRoutes);
 
-// Root health check
 app.get('/health', (req, res) => {
   res.json({
     success: true,
@@ -26,18 +23,14 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Start server
 async function startServer() {
   try {
-    // Connect to Redis
     await connectRedis();
     console.log('✅ Redis connected');
 
-    // Start Kafka consumer
     await startKafkaConsumer();
     console.log('✅ Kafka consumer started');
 
-    // Start Express server
     app.listen(Number(PORT), '0.0.0.0', () => {
       console.log(`🚀 Feed Service running on port ${PORT}`);
     });
@@ -47,7 +40,6 @@ async function startServer() {
   }
 }
 
-// Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('SIGTERM received, starting graceful shutdown...');
   await stopKafkaConsumer();
