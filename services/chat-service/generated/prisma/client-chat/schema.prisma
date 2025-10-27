@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma/client-chat"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL_1")
+}
+
+enum ChatType {
+  SINGLE
+  GROUP
+}
+
+enum MsgStatus {
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+}
+
+// Conversation model - Instagram style conversation list
+model Conversation {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String    @unique @map("conversation_id")
+  chatType       ChatType  @map("chat_type")
+  participants   String[] // Array of user IDs
+  lastMessage    String?   @map("last_message")
+  lastMessageBy  String?   @map("last_message_by")
+  lastMessageAt  DateTime? @map("last_message_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([participants])
+  @@map("conversations")
+}
+
+// Message model with Instagram features
+model Message {
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String      @map("conversation_id")
+  messageType    MessageType @default(TEXT) @map("message_type")
+  senderId       String      @map("sender_id")
+  senderUsername String      @map("sender_username")
+  content        String
+  mediaUrl       String?     @map("media_url") // For images/videos
+  status         MsgStatus   @default(SENT)
+  isDeleted      Boolean     @default(false) @map("is_deleted")
+  deletedAt      DateTime?   @map("deleted_at")
+  reactions      Json? // {userId: emoji} for reactions
+  replyTo        String?     @map("reply_to") @db.ObjectId // Reply to message ID
+  createdAt      DateTime    @default(now()) @map("created_at")
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@map("messages")
+}
+
+// Message read/delivery tracking - who has read/delivered
+model MessageReadStatus {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  messageId String    @map("message_id") @db.ObjectId
+  userId    String    @map("user_id")
+  status    MsgStatus @default(SENT)
+  timestamp DateTime  @default(now())
+
+  @@unique([messageId, userId])
+  @@index([messageId])
+  @@index([userId])
+  @@map("message_read_statuses")
+}
+
+// Unread count per conversation per user
+model UnreadCount {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String    @map("conversation_id")
+  userId         String    @map("user_id")
+  count          Int       @default(0)
+  lastReadAt     DateTime? @map("last_read_at")
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@map("unread_counts")
+}
